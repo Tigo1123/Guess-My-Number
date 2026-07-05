@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guess My Number</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="terminal">
+      <!-- HEADER -->
+      <header>
+        <h1>GUESS MY NUMBER</h1>
+
+        <p class="subtitle">-- CHALLENGE YOUR MIND --</p>
+      </header>
+
+      <div class="divider"></div>
+
+      <!-- Difficulty -->
+      <section class="difficulty">
+        <button class="difficulty--btn active" data-level="easy">Easy</button>
+
+        <button class="difficulty--btn" data-level="medium">Medium</button>
+
+        <button class="difficulty--btn" data-level="hard">Hard</button>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Secret Number -->
+      <div class="number">?</div>
+
+      <!-- Message -->
+      <p class="message">Start guessing...</p>
+
+      <p class="rang">Guess a Number between 1 and ?</p>
+      <!-- Input -->
+      <div class="input-box">
+        <input type="number" class="guess" placeholder="Type a number..." />
+      </div>
+
+      <!-- Check Button -->
+      <button class="check">Check</button>
+
+      <div class="divider"></div>
+
+      <!-- Score Board -->
+      <section class="score-board">
+        <div class="score-box">
+          <div class="label">SCORE</div>
+
+          <div class="value score">20</div>
+        </div>
+
+        <div class="score-box">
+          <div class="label">HIGHSCORE</div>
+
+          <div class="value highscore">0</div>
+        </div>
+      </section>
+
+      <!-- Again -->
+      <button class="again">Again</button>
+
+      <p class="tip">TIP: Guess the hidden number.</p>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
