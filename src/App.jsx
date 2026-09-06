@@ -6,8 +6,10 @@ import { GameStatusMessage } from './components/GameStatusMessage';
 import { ProximityIndicator } from './components/ProximityIndicator';
 import { GuessForm } from './components/GuessForm';
 import { ScoreBoard } from './components/ScoreBoard';
+import { RoundSummary } from './components/RoundSummary';
 import { GuessHistory } from './components/GuessHistory';
 import { ActionControls } from './components/ActionControls';
+import { GameStatistics } from './components/GameStatistics';
 import { useGameState } from './hooks/useGameState';
 
 export function App() {
@@ -26,9 +28,11 @@ export function App() {
     proximity,
     isInvalid,
     resetToken,
+    statistics,
     changeDifficulty,
     makeGuess,
     resetGame,
+    resetStatistics,
   } = useGameState();
 
   const isGameOver = status !== 'PLAYING';
@@ -89,12 +93,27 @@ export function App() {
         attempts={attempts}
       />
 
+      <RoundSummary
+        status={status}
+        difficultyName={config.name}
+        score={score}
+        attempts={attempts}
+        secretNumber={secretNumber}
+      />
+
       <GuessHistory
         history={guessHistory}
       />
 
       <ActionControls
         onResetGame={resetGame}
+      />
+
+      <div className="divider" />
+
+      <GameStatistics
+        statistics={statistics}
+        onResetStatistics={resetStatistics}
       />
     </main>
   );

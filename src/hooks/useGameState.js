@@ -32,15 +32,74 @@ export function sanitizeHighScores(raw) {
   };
 }
 
+export const INITIAL_STATISTICS = {
+  totalGames: 0,
+  totalWins: 0,
+  totalLosses: 0,
+  totalValidGuesses: 0,
+  byDifficulty: {
+    easy: { games: 0, wins: 0, losses: 0 },
+    medium: { games: 0, wins: 0, losses: 0 },
+    hard: { games: 0, wins: 0, losses: 0 },
+  },
+};
+
+function sanitizeCounter(val) {
+  if (typeof val === 'number' && Number.isFinite(val) && Number.isInteger(val) && val >= 0) {
+    return val;
+  }
+  return 0;
+}
+
+function sanitizeDifficultyStats(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { games: 0, wins: 0, losses: 0 };
+  }
+  return {
+    games: sanitizeCounter(raw.games),
+    wins: sanitizeCounter(raw.wins),
+    losses: sanitizeCounter(raw.losses),
+  };
+}
+
+export function sanitizeStatistics(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return INITIAL_STATISTICS;
+  }
+
+  const byDiff = raw.byDifficulty && typeof raw.byDifficulty === 'object' && !Array.isArray(raw.byDifficulty)
+    ? raw.byDifficulty
+    : {};
+
+  return {
+    totalGames: sanitizeCounter(raw.totalGames),
+    totalWins: sanitizeCounter(raw.totalWins),
+    totalLosses: sanitizeCounter(raw.totalLosses),
+    totalValidGuesses: sanitizeCounter(raw.totalValidGuesses),
+    byDifficulty: {
+      easy: sanitizeDifficultyStats(byDiff.easy),
+      medium: sanitizeDifficultyStats(byDiff.medium),
+      hard: sanitizeDifficultyStats(byDiff.hard),
+    },
+  };
+}
+
 export function useGameState() {
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY);
   const config = DIFFICULTIES[difficulty];
 
-  // Persistent high scores per difficulty in localStorage with normalization
+  // Persistent high scores per difficulty in localStorage
   const [highScores, setHighScores] = useLocalStorage(
     'guess_my_number_highscores',
     { easy: 0, medium: 0, hard: 0 },
     sanitizeHighScores
+  );
+
+  // Persistent lifetime statistics in localStorage
+  const [statistics, setStatistics] = useLocalStorage(
+    'guess_my_number_statistics',
+    INITIAL_STATISTICS,
+    sanitizeStatistics
   );
 
   const [secretNumber, setSecretNumber] = useState(() => generateSecretNumber(config.maxNumber));
@@ -88,6 +147,11 @@ export function useGameState() {
     }
   }, [isInvalid]);
 
+  // Reset Statistics only
+  const resetStatistics = useCallback(() => {
+    setStatistics(INITIAL_STATISTICS);
+  }, [setStatistics]);
+
   // Make Guess
   const makeGuess = useCallback((rawGuess) => {
     if (status !== 'PLAYING') return;
@@ -113,21 +177,41 @@ export function useGameState() {
       return;
     }
 
-    // Valid guess: clear invalid flag
+    // Valid guess: clear invalid flag and increment attempts
     setIsInvalid(false);
     setAttempts((prev) => prev + 1);
 
+    // WIN CONDITION
     if (num === secretNumber) {
       setStatus('WON');
       setMessage('🎉 Correct Number!');
       setProximity(null);
       setGuessHistory((prev) => [...prev, { guess: num, result: 'Correct' }]);
 
-      // Update persistent high score for active difficulty only
+      // Update high score for active difficulty
       setHighScores((prev) => ({
         ...prev,
         [difficulty]: Math.max(prev[difficulty] || 0, score),
       }));
+
+      // Update statistics exactly once for winning game end
+      setStatistics((prev) => {
+        const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
+        return {
+          ...prev,
+          totalGames: prev.totalGames + 1,
+          totalWins: prev.totalWins + 1,
+          totalValidGuesses: prev.totalValidGuesses + 1,
+          byDifficulty: {
+            ...prev.byDifficulty,
+            [difficulty]: {
+              ...diffStats,
+              games: diffStats.games + 1,
+              wins: diffStats.wins + 1,
+            },
+          },
+        };
+      });
       return;
     }
 
@@ -144,11 +228,36 @@ export function useGameState() {
       setStatus('LOST');
       setMessage('💀 Game Over!');
       setProximity(null);
+
+      // Update statistics exactly once for losing game end
+      setStatistics((prev) => {
+        const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
+        return {
+          ...prev,
+          totalGames: prev.totalGames + 1,
+          totalLosses: prev.totalLosses + 1,
+          totalValidGuesses: prev.totalValidGuesses + 1,
+          byDifficulty: {
+            ...prev.byDifficulty,
+            [difficulty]: {
+              ...diffStats,
+              games: diffStats.games + 1,
+              losses: diffStats.losses + 1,
+            },
+          },
+        };
+      });
     } else {
       setScore(newScore);
       setMessage(num > secretNumber ? '📉 Too High' : '📈 Too Low');
+
+      // Update lifetime valid guesses for in-progress game valid guess
+      setStatistics((prev) => ({
+        ...prev,
+        totalValidGuesses: prev.totalValidGuesses + 1,
+      }));
     }
-  }, [config.maxNumber, difficulty, score, secretNumber, setHighScores, status]);
+  }, [config.maxNumber, difficulty, score, secretNumber, setHighScores, setStatistics, status]);
 
   return {
     difficulty,
@@ -165,8 +274,10 @@ export function useGameState() {
     proximity,
     isInvalid,
     resetToken,
+    statistics,
     changeDifficulty,
     makeGuess,
     resetGame,
+    resetStatistics,
   };
 }
