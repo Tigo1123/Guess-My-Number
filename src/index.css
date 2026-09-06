@@ -306,6 +306,60 @@ h1 {
 }
 
 /* ===========================
+   ROUND SUMMARY
+=========================== */
+.round-summary {
+  margin-top: 3rem;
+  border: 3px double white;
+  padding: 2rem;
+  background: black;
+}
+
+.summary-title {
+  font-size: 2rem;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed white;
+  padding-bottom: 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #555;
+  background: #0d0d0d;
+}
+
+.summary-label {
+  font-size: 1.2rem;
+  color: #aaa;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+.summary-value.win {
+  color: #00ff88;
+}
+
+.summary-value.loss {
+  color: #ff3366;
+}
+
+/* ===========================
    GUESS HISTORY
 =========================== */
 .guess-history-container {
@@ -367,6 +421,122 @@ h1 {
 
 .history-result.correct {
   color: #00ff88;
+}
+
+/* ===========================
+   STATISTICS SECTION
+=========================== */
+.statistics-container {
+  margin-top: 3rem;
+  border: 2px solid white;
+  padding: 2.5rem 2rem;
+  background: black;
+}
+
+.statistics-title {
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px dashed white;
+  padding-bottom: 1rem;
+}
+
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stats-box {
+  border: 1px solid white;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: #0a0a0a;
+}
+
+.stats-box.full-width {
+  grid-column: 1 / -1;
+}
+
+.stats-label {
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+  color: #aaa;
+  margin-bottom: 0.8rem;
+}
+
+.stats-value {
+  font-size: 2.8rem;
+  font-weight: bold;
+}
+
+.stats-value.win, .win {
+  color: #00ff88;
+}
+
+.stats-value.loss, .loss {
+  color: #ff3366;
+}
+
+.stats-subtitle {
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.stats-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stats-diff-card {
+  border: 1px dashed white;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: #0d0d0d;
+}
+
+.diff-name {
+  font-size: 1.6rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+}
+
+.diff-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+}
+
+.stats-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-reset-stats {
+  background: black;
+  color: white;
+  border: 2px solid white;
+  padding: 1.2rem 3rem;
+  font-size: 1.6rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-reset-stats:hover {
+  background: #ff3366;
+  color: white;
+  border-color: #ff3366;
 }
 
 /* ===========================
@@ -472,5 +642,13 @@ h1 {
 
   .history-item {
     font-size: 1.4rem;
+  }
+
+  .stats-overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stats-breakdown-grid {
+    grid-template-columns: 1fr;
   }
 }
