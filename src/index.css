@@ -1,0 +1,364 @@
+/* ===========================
+   RETRO TERMINAL THEME (CLEANED)
+=========================== */
+html {
+  font-size: 62.5%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #000;
+  --text: #fff;
+  --border: #fff;
+  --transition: 0.25s;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Courier New", monospace;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 4rem 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+/* Background Theme States */
+body.easy {
+  --bg: rgb(149, 149, 4);
+}
+
+body.medium {
+  --bg: green;
+}
+
+body.hard {
+  --bg: red;
+}
+
+body.won {
+  --bg: #06a93a;
+}
+
+body.lost {
+  --bg: #3a0000;
+}
+
+/* ===========================
+   TERMINAL
+=========================== */
+.terminal {
+  width: 100%;
+  max-width: 900px;
+  border: 4px solid white;
+  padding: 3.5rem;
+  position: relative;
+  background: transparent;
+}
+
+/* Inner border */
+.terminal::before {
+  content: "";
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  border: 2px solid white;
+  pointer-events: none;
+}
+
+/* ===========================
+   TITLE & HEADER
+=========================== */
+h1 {
+  text-align: center;
+  font-size: clamp(3.2rem, 6vw, 6.4rem);
+  letter-spacing: 5px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2rem;
+  letter-spacing: 3px;
+}
+
+/* Divider */
+.divider {
+  border-top: 2px dashed white;
+  margin: 3rem 0;
+}
+
+/* ===========================
+   DIFFICULTY
+=========================== */
+.difficulty {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.difficulty--btn {
+  width: 17rem;
+  max-width: 100%;
+  background: black;
+  color: white;
+  border: 2px solid white;
+  font-family: inherit;
+  font-size: 2.2rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.difficulty--btn:hover {
+  background: white;
+  color: black;
+}
+
+.difficulty--btn.active {
+  background: white;
+  color: black;
+  font-weight: bold;
+}
+
+/* ===========================
+   SECRET NUMBER
+=========================== */
+.number {
+  width: min(22rem, 80%);
+  margin: 3.5rem auto;
+  border: 3px solid white;
+  padding: 3rem 1.5rem;
+  font-size: 6.4rem;
+  text-align: center;
+  transition: all 0.35s ease;
+  word-break: break-all;
+}
+
+.number.revealed {
+  width: min(30rem, 90%);
+  background: white;
+  color: black;
+}
+
+/* ===========================
+   MESSAGE & RANGE
+=========================== */
+.message {
+  text-align: center;
+  font-size: 2.8rem;
+  min-height: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.rang {
+  text-align: center;
+  font-size: 2rem;
+  color: rgb(241, 241, 230);
+  margin-bottom: 2rem;
+}
+
+/* ===========================
+   INPUT & FORM
+=========================== */
+.input-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.guess {
+  width: 100%;
+  max-width: 60rem;
+  background: black;
+  color: white;
+  border: 2px solid white;
+  outline: none;
+  font-size: 2.4rem;
+  padding: 1.8rem;
+  font-family: inherit;
+  text-align: center;
+}
+
+.guess::placeholder {
+  color: #888;
+}
+
+.guess:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+.check,
+.again {
+  display: block;
+  margin: 3rem auto;
+  background: black;
+  color: white;
+  border: 2px solid white;
+  padding: 1.6rem 5rem;
+  font-size: 2.4rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.check:hover:not(:disabled),
+.again:hover {
+  background: white;
+  color: black;
+}
+
+.check:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===========================
+   SCORE BOARD
+=========================== */
+.score-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 2px solid white;
+  margin-top: 3.5rem;
+}
+
+.score-box {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.score-box:first-child {
+  border-right: 2px solid white;
+}
+
+.label {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 2px;
+}
+
+.value {
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+.tip {
+  margin-top: 4rem;
+  text-align: center;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===========================
+   MOBILE RESPONSIVENESS
+=========================== */
+@media (max-width: 768px) {
+  body {
+    padding: 1.5rem;
+  }
+
+  .terminal {
+    padding: 2rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    font-size: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .difficulty {
+    gap: 1rem;
+  }
+
+  .difficulty--btn {
+    width: 100%;
+    max-width: 28rem;
+    font-size: 1.8rem;
+    padding: 1.2rem;
+  }
+
+  .number {
+    width: 14rem;
+    font-size: 4.5rem;
+    padding: 2rem 1rem;
+  }
+
+  .number.revealed {
+    width: 100%;
+  }
+
+  .guess {
+    font-size: 1.8rem;
+    padding: 1.2rem;
+  }
+
+  .check,
+  .again {
+    width: 100%;
+    font-size: 1.8rem;
+    padding: 1.2rem;
+  }
+
+  .message,
+  .rang,
+  .tip {
+    font-size: 1.6rem;
+  }
+
+  .score-board {
+    grid-template-columns: 1fr;
+  }
+
+  .score-box:first-child {
+    border-right: none;
+    border-bottom: 2px solid white;
+  }
+
+  .label {
+    font-size: 1.6rem;
+  }
+
+  .value {
+    font-size: 3.6rem;
+  }
+}
