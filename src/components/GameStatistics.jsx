@@ -1,6 +1,11 @@
 import React from 'react';
 
-export function GameStatistics({ statistics, onResetStatistics }) {
+export function GameStatistics({
+  statistics,
+  streak,
+  bestAttempts,
+  onResetStatistics,
+}) {
   const totalGames = statistics.totalGames || 0;
   const totalWins = statistics.totalWins || 0;
   const totalLosses = statistics.totalLosses || 0;
@@ -9,9 +14,18 @@ export function GameStatistics({ statistics, onResetStatistics }) {
   const winRate = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all lifetime statistics? High scores will not be affected.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to reset lifetime statistics, win streaks, and best attempt records? High scores will not be affected.'
+      )
+    ) {
       onResetStatistics();
     }
+  };
+
+  const formatBestAttempts = (val) => {
+    if (val === null || val === undefined) return '—';
+    return `${val} attempt${val > 1 ? 's' : ''}`;
   };
 
   return (
@@ -41,10 +55,11 @@ export function GameStatistics({ statistics, onResetStatistics }) {
         </div>
       </div>
 
-      <h3 className="stats-subtitle">DIFFICULTY BREAKDOWN</h3>
+      <h3 className="stats-subtitle">DIFFICULTY BREAKDOWN & BEST ATTEMPTS</h3>
       <div className="stats-breakdown-grid">
         {['easy', 'medium', 'hard'].map((level) => {
           const diffStats = statistics.byDifficulty?.[level] || { games: 0, wins: 0, losses: 0 };
+          const bestAtt = bestAttempts?.[level];
           return (
             <div key={level} className="stats-diff-card">
               <div className="diff-name">{level.toUpperCase()}</div>
@@ -52,6 +67,9 @@ export function GameStatistics({ statistics, onResetStatistics }) {
                 <span>Games: <strong>{diffStats.games}</strong></span>
                 <span>Wins: <strong className="win">{diffStats.wins}</strong></span>
                 <span>Losses: <strong className="loss">{diffStats.losses}</strong></span>
+                <span className="best-attempts-label">
+                  Best: <strong>{formatBestAttempts(bestAtt)}</strong>
+                </span>
               </div>
             </div>
           );
@@ -63,7 +81,7 @@ export function GameStatistics({ statistics, onResetStatistics }) {
           type="button"
           className="btn-reset-stats"
           onClick={handleReset}
-          aria-label="Reset lifetime game statistics"
+          aria-label="Reset lifetime statistics, streaks, and best attempt records"
         >
           Reset Statistics
         </button>

@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 import { Header } from './components/Header';
+import { ModeSelector } from './components/ModeSelector';
 import { DifficultySelector } from './components/DifficultySelector';
 import { SecretNumberDisplay } from './components/SecretNumberDisplay';
 import { GameStatusMessage } from './components/GameStatusMessage';
 import { ProximityIndicator } from './components/ProximityIndicator';
+import { StreakDisplay } from './components/StreakDisplay';
+import { TimerDisplay } from './components/TimerDisplay';
 import { GuessForm } from './components/GuessForm';
 import { ScoreBoard } from './components/ScoreBoard';
 import { RoundSummary } from './components/RoundSummary';
@@ -15,6 +18,7 @@ import { useGameState } from './hooks/useGameState';
 export function App() {
   const {
     difficulty,
+    gameMode,
     config,
     secretNumber,
     score,
@@ -29,7 +33,11 @@ export function App() {
     isInvalid,
     resetToken,
     statistics,
+    streak,
+    bestAttempts,
+    timeRemaining,
     changeDifficulty,
+    changeGameMode,
     makeGuess,
     resetGame,
     resetStatistics,
@@ -53,11 +61,26 @@ export function App() {
     <main className="terminal">
       <Header />
 
+      <ModeSelector
+        activeMode={gameMode}
+        onSelectMode={changeGameMode}
+      />
+
       <div className="divider" />
 
       <DifficultySelector
         activeDifficulty={difficulty}
         onSelectDifficulty={changeDifficulty}
+      />
+
+      <StreakDisplay
+        currentStreak={streak.currentStreak}
+        bestStreak={streak.bestStreak}
+      />
+
+      <TimerDisplay
+        timeRemaining={timeRemaining}
+        isTimedMode={gameMode === 'timed'}
       />
 
       <div className="divider" />
@@ -96,9 +119,11 @@ export function App() {
       <RoundSummary
         status={status}
         difficultyName={config.name}
+        gameMode={gameMode}
         score={score}
         attempts={attempts}
         secretNumber={secretNumber}
+        timeRemaining={timeRemaining}
       />
 
       <GuessHistory
@@ -113,6 +138,8 @@ export function App() {
 
       <GameStatistics
         statistics={statistics}
+        streak={streak}
+        bestAttempts={bestAttempts}
         onResetStatistics={resetStatistics}
       />
     </main>
