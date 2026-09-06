@@ -1,9 +1,18 @@
 import React from 'react';
 
-export function RoundSummary({ status, difficultyName, score, attempts, secretNumber }) {
+export function RoundSummary({
+  status,
+  difficultyName,
+  gameMode,
+  score,
+  attempts,
+  secretNumber,
+  timeRemaining,
+}) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
   const isWin = status === 'WON';
+  const isTimedMode = gameMode === 'timed';
 
   return (
     <section className="round-summary" aria-label="Round Summary">
@@ -11,6 +20,12 @@ export function RoundSummary({ status, difficultyName, score, attempts, secretNu
         ROUND SUMMARY: {isWin ? 'VICTORY' : 'GAME OVER'}
       </h2>
       <div className="summary-grid">
+        <div className="summary-item">
+          <span className="summary-label">GAME MODE:</span>
+          <span className="summary-value">
+            {isTimedMode ? 'TIMED CHALLENGE' : 'CLASSIC'}
+          </span>
+        </div>
         <div className="summary-item">
           <span className="summary-label">RESULT:</span>
           <span className={`summary-value ${isWin ? 'win' : 'loss'}`}>
@@ -33,6 +48,14 @@ export function RoundSummary({ status, difficultyName, score, attempts, secretNu
           <span className="summary-label">SECRET NUMBER:</span>
           <span className="summary-value">{secretNumber}</span>
         </div>
+        {isTimedMode && (
+          <div className="summary-item">
+            <span className="summary-label">TIME METRIC:</span>
+            <span className="summary-value">
+              {timeRemaining === 0 ? 'TIME EXPIRED' : `${timeRemaining}s LEFT`}
+            </span>
+          </div>
+        )}
       </div>
     </section>
   );
