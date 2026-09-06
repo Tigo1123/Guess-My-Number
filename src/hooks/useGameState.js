@@ -51,6 +51,8 @@ export function useGameState() {
   const [attempts, setAttempts] = useState(0);
   const [guessHistory, setGuessHistory] = useState([]);
   const [proximity, setProximity] = useState(null);
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [resetToken, setResetToken] = useState(0);
 
   // Active difficulty high score
   const currentHighScore = highScores[difficulty] || 0;
@@ -67,6 +69,8 @@ export function useGameState() {
     setAttempts(0);
     setGuessHistory([]);
     setProximity(null);
+    setIsInvalid(false);
+    setResetToken((prev) => prev + 1);
   }, [difficulty]);
 
   // Change Difficulty
@@ -76,6 +80,14 @@ export function useGameState() {
     }
   }, [difficulty, resetGame]);
 
+  // Input change handler clearing invalid state
+  const handleGuessChange = useCallback((val) => {
+    setGuessInput(val);
+    if (isInvalid) {
+      setIsInvalid(false);
+    }
+  }, [isInvalid]);
+
   // Make Guess
   const makeGuess = useCallback((rawGuess) => {
     if (status !== 'PLAYING') return;
@@ -83,6 +95,7 @@ export function useGameState() {
     const trimmed = String(rawGuess).trim();
     if (!trimmed) {
       setMessage('⛔ No Number');
+      setIsInvalid(true);
       return;
     }
 
@@ -90,15 +103,18 @@ export function useGameState() {
 
     if (isNaN(num) || !Number.isInteger(num)) {
       setMessage('⛔ Enter a valid integer');
+      setIsInvalid(true);
       return;
     }
 
     if (num < 1 || num > config.maxNumber) {
       setMessage(`⛔ Number must be between 1 and ${config.maxNumber}`);
+      setIsInvalid(true);
       return;
     }
 
-    // Valid in-range integer guess verified
+    // Valid guess: clear invalid flag
+    setIsInvalid(false);
     setAttempts((prev) => prev + 1);
 
     if (num === secretNumber) {
@@ -142,11 +158,13 @@ export function useGameState() {
     highScore: currentHighScore,
     status,
     guessInput,
-    setGuessInput,
+    setGuessInput: handleGuessChange,
     message,
     attempts,
     guessHistory,
     proximity,
+    isInvalid,
+    resetToken,
     changeDifficulty,
     makeGuess,
     resetGame,
