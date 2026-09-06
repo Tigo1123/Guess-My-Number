@@ -24,6 +24,8 @@ export function App() {
     attempts,
     guessHistory,
     proximity,
+    isInvalid,
+    resetToken,
     changeDifficulty,
     makeGuess,
     resetGame,
@@ -44,7 +46,7 @@ export function App() {
   }, [difficulty, status]);
 
   return (
-    <div className="terminal">
+    <main className="terminal">
       <Header />
 
       <div className="divider" />
@@ -75,6 +77,8 @@ export function App() {
         onGuessChange={setGuessInput}
         onSubmitGuess={makeGuess}
         disabled={isGameOver}
+        isInvalid={isInvalid}
+        resetToken={resetToken}
       />
 
       <div className="divider" />
@@ -92,7 +96,7 @@ export function App() {
       <ActionControls
         onResetGame={resetGame}
       />
-    </div>
+    </main>
   );
 }
 

@@ -230,6 +230,12 @@ h1 {
   padding: 1.8rem;
   font-family: inherit;
   text-align: center;
+  transition: border-color 0.2s ease;
+}
+
+.guess.invalid {
+  border-color: #ff3366;
+  box-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
 }
 
 .guess::placeholder {
@@ -274,7 +280,7 @@ h1 {
 =========================== */
 .score-board {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   border: 2px solid white;
   margin-top: 3.5rem;
 }
@@ -316,6 +322,13 @@ h1 {
   text-align: center;
   border-bottom: 1px dashed white;
   padding-bottom: 1rem;
+}
+
+.history-empty {
+  text-align: center;
+  font-size: 1.6rem;
+  color: #888;
+  padding: 1rem 0;
 }
 
 .history-list {
@@ -455,5 +468,9 @@ h1 {
 
   .value {
     font-size: 3.6rem;
+  }
+
+  .history-item {
+    font-size: 1.4rem;
   }
 }
