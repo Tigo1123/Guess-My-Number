@@ -3,7 +3,7 @@ import { DIFFICULTIES } from '../constants/difficulty';
 
 export function DifficultySelector({ activeDifficulty, onSelectDifficulty }) {
   return (
-    <section className="difficulty">
+    <section className="difficulty" aria-label="Select Difficulty">
       {Object.values(DIFFICULTIES).map((level) => {
         const isActive = activeDifficulty === level.id;
         return (
@@ -12,6 +12,7 @@ export function DifficultySelector({ activeDifficulty, onSelectDifficulty }) {
             type="button"
             className={`difficulty--btn ${isActive ? 'active' : ''}`}
             data-level={level.id}
+            aria-pressed={isActive}
             onClick={() => onSelectDifficulty(level.id)}
           >
             {level.name}

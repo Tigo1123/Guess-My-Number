@@ -1,5 +1,5 @@
 /* ===========================
-   RETRO TERMINAL THEME (CLEANED)
+   RETRO TERMINAL THEME
 =========================== */
 html {
   font-size: 62.5%;
@@ -172,6 +172,44 @@ h1 {
 }
 
 /* ===========================
+   PROXIMITY FEEDBACK
+=========================== */
+.proximity-box {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.proximity-text {
+  display: inline-block;
+  font-size: 1.8rem;
+  font-weight: bold;
+  padding: 0.6rem 1.4rem;
+  border: 2px solid white;
+  background: black;
+  letter-spacing: 1px;
+}
+
+.proximity-burning-hot {
+  color: #ff3366;
+  border-color: #ff3366;
+}
+
+.proximity-hot {
+  color: #ff9900;
+  border-color: #ff9900;
+}
+
+.proximity-warm {
+  color: #ffcc00;
+  border-color: #ffcc00;
+}
+
+.proximity-cold {
+  color: #66ccff;
+  border-color: #66ccff;
+}
+
+/* ===========================
    INPUT & FORM
 =========================== */
 .input-box {
@@ -236,29 +274,86 @@ h1 {
 =========================== */
 .score-board {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   border: 2px solid white;
   margin-top: 3.5rem;
 }
 
 .score-box {
-  padding: 2.5rem 1.5rem;
+  padding: 2.5rem 1rem;
   text-align: center;
 }
 
-.score-box:first-child {
+.score-box:not(:last-child) {
   border-right: 2px solid white;
 }
 
 .label {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 1.5rem;
   letter-spacing: 2px;
 }
 
 .value {
-  font-size: 5rem;
+  font-size: 4.5rem;
   font-weight: bold;
+}
+
+/* ===========================
+   GUESS HISTORY
+=========================== */
+.guess-history-container {
+  margin-top: 3rem;
+  border: 2px solid white;
+  padding: 2rem;
+  background: black;
+}
+
+.history-title {
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 1px dashed white;
+  padding-bottom: 1rem;
+}
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.6rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #444;
+}
+
+.history-number strong {
+  font-size: 1.8rem;
+}
+
+.history-result {
+  font-weight: bold;
+}
+
+.history-result.too-high {
+  color: #ff9999;
+}
+
+.history-result.too-low {
+  color: #99ccff;
+}
+
+.history-result.correct {
+  color: #00ff88;
 }
 
 /* ===========================
@@ -349,7 +444,7 @@ h1 {
     grid-template-columns: 1fr;
   }
 
-  .score-box:first-child {
+  .score-box:not(:last-child) {
     border-right: none;
     border-bottom: 2px solid white;
   }

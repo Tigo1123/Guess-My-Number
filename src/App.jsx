@@ -3,8 +3,10 @@ import { Header } from './components/Header';
 import { DifficultySelector } from './components/DifficultySelector';
 import { SecretNumberDisplay } from './components/SecretNumberDisplay';
 import { GameStatusMessage } from './components/GameStatusMessage';
+import { ProximityIndicator } from './components/ProximityIndicator';
 import { GuessForm } from './components/GuessForm';
 import { ScoreBoard } from './components/ScoreBoard';
+import { GuessHistory } from './components/GuessHistory';
 import { ActionControls } from './components/ActionControls';
 import { useGameState } from './hooks/useGameState';
 
@@ -19,6 +21,9 @@ export function App() {
     guessInput,
     setGuessInput,
     message,
+    attempts,
+    guessHistory,
+    proximity,
     changeDifficulty,
     makeGuess,
     resetGame,
@@ -26,7 +31,7 @@ export function App() {
 
   const isGameOver = status !== 'PLAYING';
 
-  // Synchronize document.body class for background colors cleanly without inline style hacks
+  // Synchronize document.body class for background colors
   useEffect(() => {
     document.body.className = '';
     if (status === 'WON') {
@@ -61,6 +66,10 @@ export function App() {
         maxNumber={config.maxNumber}
       />
 
+      <ProximityIndicator
+        proximity={proximity}
+      />
+
       <GuessForm
         guessInput={guessInput}
         onGuessChange={setGuessInput}
@@ -73,6 +82,11 @@ export function App() {
       <ScoreBoard
         score={score}
         highScore={highScore}
+        attempts={attempts}
+      />
+
+      <GuessHistory
+        history={guessHistory}
       />
 
       <ActionControls
