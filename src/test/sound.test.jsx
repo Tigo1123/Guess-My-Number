@@ -166,6 +166,7 @@ describe('Sound Effects Hook & AudioContext Lifecycle', () => {
     fireEvent.change(guessInput, { target: { value: '50' } });
     await act(async () => {
       fireEvent.click(checkBtn);
+      await new Promise((r) => setTimeout(r, 150));
     });
 
     const initialOscCalls = mockAudioContextInstance.createOscillator.mock.calls.length;
@@ -173,34 +174,49 @@ describe('Sound Effects Hook & AudioContext Lifecycle', () => {
 
     // 2. Switch Sound Effects OFF in Settings
     const settingsTab = screenComp.getByRole('tab', { name: /settings/i });
-    fireEvent.click(settingsTab);
+    await act(async () => {
+      fireEvent.click(settingsTab);
+    });
 
     const soundToggle = document.querySelector('.btn-sound-toggle');
-    fireEvent.click(soundToggle);
+    await act(async () => {
+      fireEvent.click(soundToggle);
+    });
     expect(localStorage.getItem('guess_my_number_sound_enabled')).toBe('false');
 
     // 3. Make another valid guess with Sound Effects = OFF
     const playTab = screenComp.getByRole('tab', { name: /^play$/i });
-    fireEvent.click(playTab);
+    await act(async () => {
+      fireEvent.click(playTab);
+    });
 
     fireEvent.change(guessInput, { target: { value: '25' } });
     await act(async () => {
       fireEvent.click(checkBtn);
+      await new Promise((r) => setTimeout(r, 150));
     });
 
     // Oscillator calls should remain unchanged (no new audio nodes created)
     expect(mockAudioContextInstance.createOscillator.mock.calls.length).toBe(initialOscCalls);
 
     // 4. Switch Sound Effects back ON in Settings
-    fireEvent.click(settingsTab);
-    fireEvent.click(soundToggle);
+    await act(async () => {
+      fireEvent.click(settingsTab);
+    });
+    await act(async () => {
+      fireEvent.click(soundToggle);
+    });
     expect(localStorage.getItem('guess_my_number_sound_enabled')).toBe('true');
 
     // 5. Make another valid guess with Sound Effects = ON again
-    fireEvent.click(playTab);
+    await act(async () => {
+      fireEvent.click(playTab);
+    });
+
     fireEvent.change(guessInput, { target: { value: '15' } });
     await act(async () => {
       fireEvent.click(checkBtn);
+      await new Promise((r) => setTimeout(r, 150));
     });
 
     // Oscillator calls should increase
