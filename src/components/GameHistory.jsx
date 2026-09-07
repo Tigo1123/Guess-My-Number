@@ -133,17 +133,17 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
 
                   return (
                     <tr key={entry.id}>
-                      <td className="date-cell">{dateText}</td>
-                      <td className={`result-cell ${isWin ? 'win' : 'loss'}`}>
+                      <td className="date-cell" data-label="DATE / TIME">{dateText}</td>
+                      <td className={`result-cell ${isWin ? 'win' : 'loss'}`} data-label="RESULT">
                         {isWin ? 'WIN' : 'LOSS'}
                       </td>
-                      <td className="diff-cell">{entry.difficulty.toUpperCase()}</td>
-                      <td className="mode-cell">{entry.mode.toUpperCase()}</td>
-                      <td className="score-cell">{entry.score}</td>
-                      <td className="attempts-cell">{entry.attempts}</td>
-                      <td className="hints-cell">{entry.hintsUsed}</td>
-                      <td className="type-cell">{typeText}</td>
-                      <td className="action-cell">
+                      <td className="diff-cell" data-label="DIFFICULTY">{entry.difficulty.toUpperCase()}</td>
+                      <td className="mode-cell" data-label="MODE">{entry.mode.toUpperCase()}</td>
+                      <td className="score-cell" data-label="SCORE">{entry.score}</td>
+                      <td className="attempts-cell" data-label="ATTEMPTS">{entry.attempts}</td>
+                      <td className="hints-cell" data-label="HINTS">{entry.hintsUsed}</td>
+                      <td className="type-cell" data-label="TYPE">{typeText}</td>
+                      <td className="action-cell" data-label="ACTION">
                         <button
                           type="button"
                           className="btn-view-details"

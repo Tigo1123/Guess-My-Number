@@ -70,7 +70,6 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
 
       <div className="leaderboard-table-wrapper table-responsive">
         <table className="leaderboard-table">
-
           <caption>Local Player Rankings ({filter.toUpperCase()})</caption>
           <thead>
             <tr>
@@ -90,17 +89,16 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
                 className={entry.isActive ? 'active-profile-row' : ''}
                 aria-current={entry.isActive ? 'row' : undefined}
               >
-                <td className="rank-cell">{index + 1}</td>
-                <td className="player-cell">
+                <td className="rank-cell" data-label="RANK">{index + 1}</td>
+                <td className="player-cell" data-label="PLAYER">
                   <span className="player-name">{entry.name}</span>
                   {entry.isActive && <span className="active-badge" aria-label="Active Player">(Active)</span>}
                 </td>
-                <td className="wins-cell">{entry.wins}</td>
-                <td className="winrate-cell">{entry.winRatePercent}%</td>
-                <td className="streak-cell">{entry.bestStreak}</td>
-                <td className="games-cell">{entry.games}</td>
-                <td className="achievements-cell">{entry.achievementCount}</td>
-
+                <td className="wins-cell" data-label="WINS">{entry.wins}</td>
+                <td className="winrate-cell" data-label="WIN RATE">{entry.winRatePercent}%</td>
+                <td className="streak-cell" data-label="BEST STREAK">{entry.bestStreak}</td>
+                <td className="games-cell" data-label="GAMES">{entry.games}</td>
+                <td className="achievements-cell" data-label="ACHIEVEMENTS">{entry.achievementCount}</td>
               </tr>
             ))}
           </tbody>
