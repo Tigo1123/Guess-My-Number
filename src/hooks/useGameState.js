@@ -1,6 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DIFFICULTIES, DEFAULT_DIFFICULTY } from '../constants/difficulty';
 import { ACHIEVEMENTS, ACHIEVEMENT_IDS } from '../constants/achievements';
+import {
+  getLocalDateKey,
+  createDailyChallenge,
+  getYesterdayDateKey,
+} from '../utils/dailyChallenge';
 import { useLocalStorage } from './useLocalStorage';
 
 function generateSecretNumber(maxNumber) {
@@ -118,46 +123,112 @@ export function sanitizeAchievements(raw) {
   return Array.from(new Set(raw.filter((id) => typeof id === 'string' && validSet.has(id))));
 }
 
+export const INITIAL_DAILY_STREAK = { current: 0, best: 0, lastCompletedDate: null };
+
+export function sanitizeDailyStreak(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return INITIAL_DAILY_STREAK;
+  }
+  const current = sanitizeNonNegativeInt(raw.current);
+  const rawBest = sanitizeNonNegativeInt(raw.best);
+  const best = Math.max(rawBest, current);
+
+  const isValidDate = typeof raw.lastCompletedDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.lastCompletedDate);
+  const lastCompletedDate = isValidDate ? raw.lastCompletedDate : null;
+
+  return { current, best, lastCompletedDate };
+}
+
+export function sanitizeDailyChallengeHistory(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return {};
+  }
+  const result = {};
+  const dateKeys = Object.keys(raw).filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  // Sort date keys descending and keep latest 30
+  dateKeys.sort().reverse();
+  const keepKeys = dateKeys.slice(0, 30);
+
+  for (const k of keepKeys) {
+    const entry = raw[k];
+    if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
+      result[k] = {
+        completed: Boolean(entry.completed),
+        won: Boolean(entry.won),
+        attempts: sanitizeNonNegativeInt(entry.attempts),
+        score: sanitizeNonNegativeInt(entry.score),
+        mode: typeof entry.mode === 'string' ? entry.mode : 'classic',
+        difficulty: typeof entry.difficulty === 'string' ? entry.difficulty : 'easy',
+      };
+    }
+  }
+
+  return result;
+}
+
 export function useGameState() {
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY);
-  const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed'
+  const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed' | 'limited'
 
   const config = DIFFICULTIES[difficulty];
 
-  // Persistent high scores per difficulty in localStorage
+  // Daily Challenge state
+  const todayKey = useMemo(() => getLocalDateKey(), []);
+  const dailyChallengeConfig = useMemo(() => createDailyChallenge(todayKey), [todayKey]);
+
+  const [isDailyChallengeActive, setIsDailyChallengeActive] = useState(false);
+  const [isPracticeReplay, setIsPracticeReplay] = useState(false);
+
+  // Persistent high scores
   const [highScores, setHighScores] = useLocalStorage(
     'guess_my_number_highscores',
     { easy: 0, medium: 0, hard: 0 },
     sanitizeHighScores
   );
 
-  // Persistent lifetime statistics in localStorage
+  // Persistent lifetime statistics
   const [statistics, setStatistics] = useLocalStorage(
     'guess_my_number_statistics',
     INITIAL_STATISTICS,
     sanitizeStatistics
   );
 
-  // Persistent win streak tracking in localStorage
+  // Persistent win streak tracking
   const [streak, setStreak] = useLocalStorage(
     'guess_my_number_streak',
     INITIAL_STREAK,
     sanitizeStreak
   );
 
-  // Persistent best attempts per difficulty in localStorage
+  // Persistent best attempts per difficulty
   const [bestAttempts, setBestAttempts] = useLocalStorage(
     'guess_my_number_best_attempts',
     INITIAL_BEST_ATTEMPTS,
     sanitizeBestAttempts
   );
 
-  // Persistent achievements in localStorage
+  // Persistent achievements
   const [achievements, setAchievements] = useLocalStorage(
     'guess_my_number_achievements',
     [],
     sanitizeAchievements
   );
+
+  // Persistent Daily Challenge history & streak
+  const [dailyChallengeHistory, setDailyChallengeHistory] = useLocalStorage(
+    'guess_my_number_daily_challenge',
+    {},
+    sanitizeDailyChallengeHistory
+  );
+
+  const [dailyStreak, setDailyStreak] = useLocalStorage(
+    'guess_my_number_daily_streak',
+    INITIAL_DAILY_STREAK,
+    sanitizeDailyStreak
+  );
+
+  const todayResult = dailyChallengeHistory[todayKey] || null;
+  const isCompletedToday = Boolean(todayResult && todayResult.completed);
 
   const [secretNumber, setSecretNumber] = useState(() => generateSecretNumber(config.maxNumber));
   const [score, setScore] = useState(config.startingScore);
@@ -185,12 +256,19 @@ export function useGameState() {
   // Active difficulty high score
   const currentHighScore = highScores[difficulty] || 0;
 
-  // Reset Game (Play Again, Difficulty Change, or Game Mode Switch)
-  const resetGame = useCallback((targetDifficulty = difficulty, targetMode = gameMode) => {
+  const isRoundFinishedRef = useRef(false);
+
+  // Reset Game (Play Again, Difficulty Change, Game Mode Switch, Daily Challenge Start)
+  const resetGame = useCallback((
+    targetDifficulty = difficulty,
+    targetMode = gameMode,
+    forcedSecretNumber = null
+  ) => {
+    isRoundFinishedRef.current = false;
     const targetConfig = DIFFICULTIES[targetDifficulty] || DIFFICULTIES[DEFAULT_DIFFICULTY];
     setDifficulty(targetDifficulty);
     setGameMode(targetMode);
-    setSecretNumber(generateSecretNumber(targetConfig.maxNumber));
+    setSecretNumber(forcedSecretNumber ?? generateSecretNumber(targetConfig.maxNumber));
     setScore(targetConfig.startingScore);
     setStatus('PLAYING');
     setGuessInput('');
@@ -210,17 +288,37 @@ export function useGameState() {
 
   // Change Difficulty
   const changeDifficulty = useCallback((newLevel) => {
-    if (newLevel !== difficulty) {
+    if (newLevel !== difficulty && !isDailyChallengeActive) {
       resetGame(newLevel, gameMode);
     }
-  }, [difficulty, gameMode, resetGame]);
+  }, [difficulty, gameMode, isDailyChallengeActive, resetGame]);
 
   // Change Game Mode
   const changeGameMode = useCallback((newMode) => {
-    if (newMode !== gameMode) {
+    if (newMode !== gameMode && !isDailyChallengeActive) {
       resetGame(difficulty, newMode);
     }
-  }, [difficulty, gameMode, resetGame]);
+  }, [difficulty, gameMode, isDailyChallengeActive, resetGame]);
+
+  // Start Daily Challenge (Official or Practice Replay)
+  const startDailyChallenge = useCallback(() => {
+    const isReplay = isCompletedToday;
+    setIsDailyChallengeActive(true);
+    setIsPracticeReplay(isReplay);
+    resetGame(dailyChallengeConfig.difficulty, dailyChallengeConfig.mode, dailyChallengeConfig.secretNumber);
+  }, [dailyChallengeConfig, isCompletedToday, resetGame]);
+
+  const startPracticeReplay = useCallback(() => {
+    setIsDailyChallengeActive(true);
+    setIsPracticeReplay(true);
+    resetGame(dailyChallengeConfig.difficulty, dailyChallengeConfig.mode, dailyChallengeConfig.secretNumber);
+  }, [dailyChallengeConfig, resetGame]);
+
+  const exitDailyChallenge = useCallback(() => {
+    setIsDailyChallengeActive(false);
+    setIsPracticeReplay(false);
+    resetGame(DEFAULT_DIFFICULTY, 'classic');
+  }, [resetGame]);
 
   // Input change handler clearing invalid state
   const handleGuessChange = useCallback((val) => {
@@ -242,6 +340,8 @@ export function useGameState() {
       mode,
       remainingTime,
       hintsCount,
+      isOfficialDaily,
+      nextDailyStreakCount,
     } = context;
 
     const currentUnlocked = new Set(achievements);
@@ -267,6 +367,12 @@ export function useGameState() {
       }
       if (difficultyLevel === 'hard') tryUnlock('HARD_MODE_HERO');
       if (hintsCount === 0) tryUnlock('NO_HELP_NEEDED');
+      if (isOfficialDaily) tryUnlock('DAILY_WINNER');
+    }
+
+    if (isOfficialDaily) {
+      tryUnlock('DAILY_DEBUT');
+      if (nextDailyStreakCount >= 3) tryUnlock('DAILY_STREAK_3');
     }
 
     if (totalGamesCount >= 10) tryUnlock('VETERAN');
@@ -278,9 +384,42 @@ export function useGameState() {
     }
   }, [achievements, setAchievements]);
 
+  // Process Official Daily Completion Result
+  const handleOfficialDailyCompletion = useCallback((isWin, finalAttempts, finalScore) => {
+    if (!isDailyChallengeActive || isPracticeReplay) return;
+
+    // Record official daily completion result
+    setDailyChallengeHistory((prev) => ({
+      ...prev,
+      [todayKey]: {
+        completed: true,
+        won: isWin,
+        attempts: finalAttempts,
+        score: finalScore,
+        mode: gameMode,
+        difficulty,
+      },
+    }));
+
+    // Update Daily Streak
+    let nextDailyStreakCount = 0;
+    setDailyStreak((prev) => {
+      if (prev.lastCompletedDate === todayKey) return prev;
+      const yesterdayKey = getYesterdayDateKey(todayKey);
+      const isConsecutive = prev.lastCompletedDate === yesterdayKey;
+      const nextCurrent = isConsecutive ? prev.current + 1 : 1;
+      const nextBest = Math.max(prev.best, nextCurrent);
+      nextDailyStreakCount = nextCurrent;
+      return { current: nextCurrent, best: nextBest, lastCompletedDate: todayKey };
+    });
+
+    return nextDailyStreakCount;
+  }, [difficulty, gameMode, isDailyChallengeActive, isPracticeReplay, setDailyChallengeHistory, setDailyStreak, todayKey]);
+
   // Timer Expiration Callback
   const handleTimerExpired = useCallback(() => {
-    if (status !== 'PLAYING') return;
+    if (status !== 'PLAYING' || isRoundFinishedRef.current) return;
+    isRoundFinishedRef.current = true;
 
     setStatus('LOST');
     setMessage('⏰ Time Expired! 💀 Game Over!');
@@ -291,6 +430,9 @@ export function useGameState() {
       ...prev,
       currentStreak: 0,
     }));
+
+    const isOfficialDaily = isDailyChallengeActive && !isPracticeReplay;
+    const nextDailyStreakCount = handleOfficialDailyCompletion(false, attempts, 0);
 
     // Update statistics exactly once for timed loss
     setStatistics((prev) => {
@@ -308,6 +450,8 @@ export function useGameState() {
         mode: gameMode,
         remainingTime: 0,
         hintsCount: hintsUsed,
+        isOfficialDaily,
+        nextDailyStreakCount: nextDailyStreakCount || 0,
       });
 
       return {
@@ -324,7 +468,7 @@ export function useGameState() {
         },
       };
     });
-  }, [attempts, difficulty, evaluateAchievements, gameMode, hintsUsed, setStatistics, setStreak, status]);
+  }, [attempts, difficulty, evaluateAchievements, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isPracticeReplay, setStatistics, setStreak, status]);
 
   // Timed Mode Countdown Effect
   useEffect(() => {
@@ -358,21 +502,17 @@ export function useGameState() {
     if (status !== 'PLAYING') return;
     if (score - hintCost < 1) return;
 
-    // Deduct cost and increment hints used
     setScore((prev) => prev - hintCost);
     setHintsUsed((prev) => prev + 1);
 
-    // Categories: 'parity', 'range', 'divisibility'
     const isEven = secretNumber % 2 === 0;
     const parityText = `The secret number is ${isEven ? 'EVEN' : 'ODD'}.`;
 
-    // Calculate range
     const rangeStep = 10;
     const rangeStart = Math.max(1, Math.floor((secretNumber - 1) / rangeStep) * rangeStep + 1);
     const rangeEnd = Math.min(config.maxNumber, rangeStart + rangeStep - 1);
     const rangeText = `The number is between ${rangeStart} and ${rangeEnd}.`;
 
-    // Divisibility hint (if 5 or 3)
     let divText = null;
     if (secretNumber % 5 === 0) {
       divText = 'The number is divisible by 5.';
@@ -396,7 +536,6 @@ export function useGameState() {
       hintText = divText;
     }
 
-    // Guard against identical repeat if different available
     if (hintText === currentHint) {
       hintText = parityText !== currentHint ? parityText : rangeText;
     }
@@ -407,7 +546,7 @@ export function useGameState() {
 
   // Make Guess
   const makeGuess = useCallback((rawGuess) => {
-    if (status !== 'PLAYING') return;
+    if (status !== 'PLAYING' || isRoundFinishedRef.current) return;
 
     const trimmed = String(rawGuess).trim();
     if (!trimmed) {
@@ -435,8 +574,11 @@ export function useGameState() {
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
 
+    const isOfficialDaily = isDailyChallengeActive && !isPracticeReplay;
+
     // WIN CONDITION
     if (num === secretNumber) {
+      isRoundFinishedRef.current = true;
       setStatus('WON');
       setMessage('🎉 Correct Number!');
       setProximity(null);
@@ -464,6 +606,8 @@ export function useGameState() {
         return { ...prev, [difficulty]: nextBest };
       });
 
+      const nextDailyStreakCount = handleOfficialDailyCompletion(true, newAttempts, score);
+
       // Update statistics & check achievements exactly once for winning game end
       setStatistics((prev) => {
         const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
@@ -480,6 +624,8 @@ export function useGameState() {
           mode: gameMode,
           remainingTime: timeRemaining,
           hintsCount: hintsUsed,
+          isOfficialDaily,
+          nextDailyStreakCount: nextDailyStreakCount || 0,
         });
 
         return {
@@ -508,14 +654,25 @@ export function useGameState() {
     setGuessHistory((prev) => [...prev, { guess: num, result: resultLabel }]);
 
     const newScore = score - 1;
-    if (newScore <= 0) {
-      setScore(0);
+    const isLimitedAttemptsExhausted = gameMode === 'limited' && newAttempts >= config.maxAttempts;
+    const isLoss = newScore <= 0 || isLimitedAttemptsExhausted;
+
+    if (isLoss) {
+      isRoundFinishedRef.current = true;
+      const lossScore = newScore <= 0 ? 0 : newScore;
+      setScore(lossScore);
       setStatus('LOST');
-      setMessage('💀 Game Over!');
+      setMessage(
+        isLimitedAttemptsExhausted
+          ? '❌ Attempts Exhausted! 💀 Game Over!'
+          : '💀 Game Over!'
+      );
       setProximity(null);
 
       // Reset streak on loss
       setStreak((prev) => ({ ...prev, currentStreak: 0 }));
+
+      const nextDailyStreakCount = handleOfficialDailyCompletion(false, newAttempts, lossScore);
 
       // Update statistics & check achievements exactly once for losing game end
       setStatistics((prev) => {
@@ -533,6 +690,8 @@ export function useGameState() {
           mode: gameMode,
           remainingTime: timeRemaining,
           hintsCount: hintsUsed,
+          isOfficialDaily,
+          nextDailyStreakCount: nextDailyStreakCount || 0,
         });
 
         return {
@@ -560,7 +719,7 @@ export function useGameState() {
         totalValidGuesses: prev.totalValidGuesses + 1,
       }));
     }
-  }, [attempts, config.maxNumber, difficulty, evaluateAchievements, gameMode, hintsUsed, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
+  }, [attempts, config.maxAttempts, config.maxNumber, difficulty, evaluateAchievements, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isPracticeReplay, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
 
   return {
     difficulty,
@@ -589,11 +748,21 @@ export function useGameState() {
     canAffordHint,
     unlockedThisRound,
     toastMessage,
+    todayKey,
+    dailyChallengeConfig,
+    isCompletedToday,
+    todayResult,
+    dailyStreak,
+    isDailyChallengeActive,
+    isPracticeReplay,
     changeDifficulty,
     changeGameMode,
     makeGuess,
     getHint,
     resetGame,
     resetStatistics,
+    startDailyChallenge,
+    startPracticeReplay,
+    exitDailyChallenge,
   };
 }

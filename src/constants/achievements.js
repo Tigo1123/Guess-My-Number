@@ -39,6 +39,21 @@ export const ACHIEVEMENTS = [
     title: 'No Help Needed',
     description: 'Win a round without using any hints.',
   },
+  {
+    id: 'DAILY_DEBUT',
+    title: 'Daily Debut',
+    description: 'Complete your first official Daily Challenge.',
+  },
+  {
+    id: 'DAILY_WINNER',
+    title: 'Daily Winner',
+    description: 'Win an official Daily Challenge.',
+  },
+  {
+    id: 'DAILY_STREAK_3',
+    title: 'Daily Devotion',
+    description: 'Reach a Daily Challenge streak of 3.',
+  },
 ];
 
 export const ACHIEVEMENT_IDS = ACHIEVEMENTS.map((a) => a.id);

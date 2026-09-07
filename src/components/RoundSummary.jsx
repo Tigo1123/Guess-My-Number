@@ -10,11 +10,22 @@ export function RoundSummary({
   timeRemaining,
   hintsUsed,
   unlockedThisRound = [],
+  maxAttempts,
+  isDailyChallengeActive,
+  isPracticeReplay,
+  todayKey,
 }) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
   const isWin = status === 'WON';
   const isTimedMode = gameMode === 'timed';
+  const isLimitedMode = gameMode === 'limited';
+
+  const modeLabel = isLimitedMode
+    ? 'LIMITED ATTEMPTS'
+    : isTimedMode
+    ? 'TIMED CHALLENGE'
+    : 'CLASSIC';
 
   return (
     <section className="round-summary" aria-label="Round Summary">
@@ -22,11 +33,17 @@ export function RoundSummary({
         ROUND SUMMARY: {isWin ? 'VICTORY' : 'GAME OVER'}
       </h2>
       <div className="summary-grid">
+        {isDailyChallengeActive && (
+          <div className="summary-item full-width highlight">
+            <span className="summary-label">DAILY CHALLENGE [{todayKey}]:</span>
+            <span className="summary-value">
+              {isPracticeReplay ? 'PRACTICE REPLAY' : 'OFFICIAL CHALLENGE'}
+            </span>
+          </div>
+        )}
         <div className="summary-item">
           <span className="summary-label">GAME MODE:</span>
-          <span className="summary-value">
-            {isTimedMode ? 'TIMED CHALLENGE' : 'CLASSIC'}
-          </span>
+          <span className="summary-value">{modeLabel}</span>
         </div>
         <div className="summary-item">
           <span className="summary-label">RESULT:</span>
@@ -54,6 +71,7 @@ export function RoundSummary({
           <span className="summary-label">SECRET NUMBER:</span>
           <span className="summary-value">{secretNumber}</span>
         </div>
+
         {isTimedMode && (
           <div className="summary-item">
             <span className="summary-label">TIME METRIC:</span>
@@ -62,6 +80,16 @@ export function RoundSummary({
             </span>
           </div>
         )}
+
+        {isLimitedMode && (
+          <div className="summary-item">
+            <span className="summary-label">ATTEMPTS REMAINING:</span>
+            <span className="summary-value">
+              {attempts >= maxAttempts ? 'EXHAUSTED' : `${maxAttempts - attempts} / ${maxAttempts}`}
+            </span>
+          </div>
+        )}
+
         {unlockedThisRound.length > 0 && (
           <div className="summary-item full-width">
             <span className="summary-label">ACHIEVEMENTS UNLOCKED:</span>

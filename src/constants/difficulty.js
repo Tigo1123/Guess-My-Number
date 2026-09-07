@@ -5,6 +5,7 @@ export const DIFFICULTIES = {
     maxNumber: 20,
     startingScore: 20,
     timedDuration: 60,
+    maxAttempts: 10,
   },
   medium: {
     id: 'medium',
@@ -12,6 +13,7 @@ export const DIFFICULTIES = {
     maxNumber: 50,
     startingScore: 15,
     timedDuration: 45,
+    maxAttempts: 7,
   },
   hard: {
     id: 'hard',
@@ -19,6 +21,7 @@ export const DIFFICULTIES = {
     maxNumber: 100,
     startingScore: 10,
     timedDuration: 30,
+    maxAttempts: 5,
   },
 };
 
