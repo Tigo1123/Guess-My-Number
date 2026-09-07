@@ -91,11 +91,14 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
         </div>
       )}
 
-      <div className="history-table-wrapper">
-        {filteredHistory.length === 0 ? (
+      <div className="history-table-wrapper table-responsive">
+        {history.length === 0 ? (
+          <p className="no-history-text">No completed games yet. Finish a round to start building your history.</p>
+        ) : filteredHistory.length === 0 ? (
           <p className="no-history-text">No game history entries matching this filter.</p>
         ) : (
           <table className="history-table">
+
             <caption>Recent Completed Games Log</caption>
             <thead>
               <tr>

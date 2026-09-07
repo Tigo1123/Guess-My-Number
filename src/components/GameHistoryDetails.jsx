@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export function GameHistoryDetails({ entry, onClose }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!entry) return null;
+
 
   const dateStr = entry.playedAt ? new Date(entry.playedAt).toLocaleString() : 'Unknown Date';
   const isWin = entry.result === 'WIN';
