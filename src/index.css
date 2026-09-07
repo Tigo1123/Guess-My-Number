@@ -92,6 +92,12 @@ body {
   box-sizing: border-box;
 }
 
+#root {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 /* Background State Tints */
 body.won { background: radial-gradient(circle at top, #0f2b1d 0%, #0b1018 45%, #070a0f 100%); }
 body.lost { background: radial-gradient(circle at top, #2b0f14 0%, #0b1018 45%, #070a0f 100%); }
@@ -107,6 +113,60 @@ body.lost { background: radial-gradient(circle at top, #2b0f14 0%, #0b1018 45%, 
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+/* Achievement Toast Banner */
+.achievement-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.6rem;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  animation: slideInDown 0.3s ease-out;
+}
+
+.toast-badge {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.toast-text {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.toast-text strong {
+  color: var(--accent);
+  margin-left: 0.2rem;
+}
+
+@media (max-width: 480px) {
+  .achievement-toast {
+    flex-direction: row;
+    gap: var(--space-sm);
+    padding: 0.8rem 1.2rem;
+  }
+
+  .toast-text {
+    font-size: 1.3rem;
+  }
 }
 
 /* Card System */
@@ -509,6 +569,12 @@ button:disabled {
   font-weight: 700;
   text-align: center;
   transition: border-color 0.15s ease;
+}
+
+.guess-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  opacity: 0.7;
 }
 
 .guess-input:focus {
@@ -979,6 +1045,10 @@ button:disabled {
   min-height: 260px;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .history-empty-card {
@@ -989,7 +1059,11 @@ button:disabled {
   justify-content: center;
   text-align: center;
   gap: var(--space-sm);
-  padding: var(--space-xl);
+  padding: var(--space-xl) var(--space-md);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .empty-title {
@@ -997,6 +1071,8 @@ button:disabled {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .empty-desc {
@@ -1004,6 +1080,7 @@ button:disabled {
   color: var(--text-secondary);
   max-width: 360px;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .btn-play-round {
@@ -1582,8 +1659,16 @@ button:disabled {
 
   .guess-input {
     width: 100%;
-    height: 52px;
+    min-width: 0;
+    height: 54px;
+    min-height: 54px;
+    padding-inline: 14px;
     font-size: 1.8rem;
+  }
+
+  .guess-input::placeholder {
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
   }
 
   .btn-check-guess {
