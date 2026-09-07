@@ -7,6 +7,8 @@ import { GameStatusMessage } from './components/GameStatusMessage';
 import { ProximityIndicator } from './components/ProximityIndicator';
 import { StreakDisplay } from './components/StreakDisplay';
 import { TimerDisplay } from './components/TimerDisplay';
+import { AttemptsRemainingDisplay } from './components/AttemptsRemainingDisplay';
+import { DailyChallengePanel } from './components/DailyChallengePanel';
 import { HintControls } from './components/HintControls';
 import { GuessForm } from './components/GuessForm';
 import { ScoreBoard } from './components/ScoreBoard';
@@ -47,12 +49,22 @@ export function App() {
     canAffordHint,
     unlockedThisRound,
     toastMessage,
+    todayKey,
+    dailyChallengeConfig,
+    isCompletedToday,
+    todayResult,
+    dailyStreak,
+    isDailyChallengeActive,
+    isPracticeReplay,
     changeDifficulty,
     changeGameMode,
     makeGuess,
     getHint,
     resetGame,
     resetStatistics,
+    startDailyChallenge,
+    startPracticeReplay,
+    exitDailyChallenge,
   } = useGameState();
 
   const {
@@ -120,9 +132,25 @@ export function App() {
         </button>
       </div>
 
+      <DailyChallengePanel
+        todayKey={todayKey}
+        dailyChallengeConfig={dailyChallengeConfig}
+        isCompletedToday={isCompletedToday}
+        todayResult={todayResult}
+        dailyStreak={dailyStreak}
+        isDailyChallengeActive={isDailyChallengeActive}
+        isPracticeReplay={isPracticeReplay}
+        onStartDailyChallenge={startDailyChallenge}
+        onStartPracticeReplay={startPracticeReplay}
+        onExitDailyChallenge={exitDailyChallenge}
+      />
+
+      <div className="divider" />
+
       <ModeSelector
         activeMode={gameMode}
         onSelectMode={changeGameMode}
+        disabled={isDailyChallengeActive}
       />
 
       <div className="divider" />
@@ -130,6 +158,7 @@ export function App() {
       <DifficultySelector
         activeDifficulty={difficulty}
         onSelectDifficulty={changeDifficulty}
+        disabled={isDailyChallengeActive}
       />
 
       <StreakDisplay
@@ -140,6 +169,12 @@ export function App() {
       <TimerDisplay
         timeRemaining={timeRemaining}
         isTimedMode={gameMode === 'timed'}
+      />
+
+      <AttemptsRemainingDisplay
+        attempts={attempts}
+        maxAttempts={config.maxAttempts}
+        isLimitedMode={gameMode === 'limited'}
       />
 
       <div className="divider" />
@@ -194,6 +229,10 @@ export function App() {
         timeRemaining={timeRemaining}
         hintsUsed={hintsUsed}
         unlockedThisRound={unlockedThisRound}
+        maxAttempts={config.maxAttempts}
+        isDailyChallengeActive={isDailyChallengeActive}
+        isPracticeReplay={isPracticeReplay}
+        todayKey={todayKey}
       />
 
       <GuessHistory
