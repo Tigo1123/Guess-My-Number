@@ -77,6 +77,57 @@ body.lost {
 }
 
 /* ===========================
+   SOUND TOGGLE
+=========================== */
+.sound-toggle-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btn-sound {
+  background: black;
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1.2rem;
+  font-family: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-sound:hover {
+  background: white;
+  color: black;
+}
+
+.btn-sound.active {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+/* ===========================
+   ACHIEVEMENT TOAST BANNER
+=========================== */
+.achievement-toast {
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00ff88;
+  color: black;
+  border: 2px solid black;
+  padding: 1rem 2rem;
+  font-weight: bold;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4);
+  z-index: 100;
+}
+
+/* ===========================
    TITLE & HEADER
 =========================== */
 h1 {
@@ -221,13 +272,12 @@ h1 {
 }
 
 .timer-value.warning {
-  color: #ff3366;
-  animation: pulse-warn 1s infinite alternate;
+  color: #ffb700;
 }
 
-@keyframes pulse-warn {
-  from { opacity: 1; }
-  to { opacity: 0.5; }
+.timer-value.critical {
+  color: #ff3366;
+
 }
 
 /* ===========================
@@ -303,6 +353,65 @@ h1 {
 .proximity-cold {
   color: #66ccff;
   border-color: #66ccff;
+}
+
+/* ===========================
+   HINT SYSTEM
+=========================== */
+.hint-section {
+  margin: 2rem auto;
+  max-width: 500px;
+  text-align: center;
+}
+
+.hint-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-hint {
+  background: black;
+  color: #ffb700;
+  border: 2px solid #ffb700;
+  padding: 1rem 2rem;
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-hint:hover:not(:disabled) {
+  background: #ffb700;
+  color: black;
+}
+
+.btn-hint:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #888;
+  color: #888;
+}
+
+.hints-used-badge {
+  font-size: 1.5rem;
+  color: #aaa;
+}
+
+.hint-display {
+  background: #111;
+  border: 2px dashed #ffb700;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  font-size: 1.8rem;
+  color: #ffb700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 /* ===========================
@@ -433,6 +542,10 @@ h1 {
   padding: 1rem;
   border: 1px solid #555;
   background: #0d0d0d;
+}
+
+.summary-item.full-width {
+  grid-column: 1 / -1;
 }
 
 .summary-label {
@@ -643,6 +756,93 @@ h1 {
 }
 
 /* ===========================
+   ACHIEVEMENTS GRID
+=========================== */
+.achievements-container {
+  margin-top: 3rem;
+  border: 2px solid white;
+  padding: 2.5rem 2rem;
+  background: black;
+}
+
+.achievements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed white;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.achievements-title {
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+}
+
+.achievements-counter {
+  font-size: 1.6rem;
+  color: #00ff88;
+  font-weight: bold;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.achievement-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid #444;
+  background: #0a0a0a;
+  transition: border-color 0.3s ease;
+}
+
+.achievement-card.unlocked {
+  border-color: #00ff88;
+  background: #051a10;
+}
+
+.achievement-icon {
+  font-size: 2.4rem;
+}
+
+.achievement-details {
+  flex: 1;
+}
+
+.achievement-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+.achievement-card.unlocked .achievement-name {
+  color: #00ff88;
+}
+
+.achievement-desc {
+  font-size: 1.2rem;
+  color: #aaa;
+}
+
+.achievement-status {
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #444;
+}
+
+.achievement-card.unlocked .achievement-status {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+/* ===========================
    FOOTER
 =========================== */
 .tip {
@@ -767,6 +967,10 @@ h1 {
   }
 
   .stats-breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievements-grid {
     grid-template-columns: 1fr;
   }
 }
