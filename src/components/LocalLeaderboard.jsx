@@ -68,8 +68,9 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
         </div>
       </div>
 
-      <div className="leaderboard-table-wrapper">
+      <div className="leaderboard-table-wrapper table-responsive">
         <table className="leaderboard-table">
+
           <caption>Local Player Rankings ({filter.toUpperCase()})</caption>
           <thead>
             <tr>

@@ -1984,3 +1984,200 @@ h1 {
 .bar-fill.classic { background: #00ccff; }
 .bar-fill.timed { background: #ff9900; }
 .bar-fill.limited { background: #cc00ff; }
+
+/* ===========================
+   PHASE 12 — V1.0 POLISH STYLES
+   =========================== */
+
+/* Centralized Theme Tokens */
+:root {
+  --bg-terminal: #0a0d0a;
+  --surface-panel: #111811;
+  --surface-card: #182218;
+  --text-main: #00ff66;
+  --text-muted: #88aa88;
+  --color-primary: #00ff66;
+  --color-warning: #ffea00;
+  --color-danger: #ff3366;
+  --border-terminal: #00ff66;
+  --focus-outline: #ffea00;
+}
+
+/* Terminal Navigation Bar */
+.terminal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface-panel);
+  border: 1px solid var(--border-terminal);
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+}
+
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.nav-tab {
+  background: black;
+  color: var(--text-muted);
+  border: 1px solid #335533;
+  padding: 0.8rem 1.4rem;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.nav-tab:hover,
+.nav-tab:focus-visible {
+  color: var(--text-main);
+  border-color: var(--color-primary);
+  outline: 2px solid var(--focus-outline);
+}
+
+.nav-tab.active {
+  background: var(--color-primary);
+  color: black;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+}
+
+.active-player-pill {
+  font-size: 1.3rem;
+  color: var(--text-main);
+  background: black;
+  border: 1px dashed var(--border-terminal);
+  padding: 0.6rem 1.2rem;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.active-player-pill .player-name {
+  color: #ffffff;
+}
+
+.tab-panel {
+  width: 100%;
+}
+
+.tab-panel[hidden] {
+  display: none !important;
+}
+
+/* Error Boundary Fallback Panel */
+.terminal-error-boundary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  padding: 2rem;
+}
+
+.error-panel {
+  background: #180808;
+  border: 2px solid var(--color-danger);
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+}
+
+.error-panel h2 {
+  color: var(--color-danger);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-panel p {
+  color: #ffcccc;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.error-panel .muted {
+  color: #aaaaaa;
+  font-size: 1.2rem;
+}
+
+.error-actions {
+  margin-top: 2rem;
+}
+
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Settings & Release Info */
+.settings-section h3 {
+  color: var(--text-main);
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.about-section {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-terminal);
+  padding: 1.8rem;
+  margin-top: 1.5rem;
+  border-radius: 4px;
+}
+
+.about-section h4 {
+  color: var(--text-main);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.about-section p {
+  font-size: 1.3rem;
+  color: #ddd;
+  line-height: 1.6;
+  margin-bottom: 0.8rem;
+}
+
+.version-tag {
+  color: var(--color-warning);
+  font-weight: bold;
+}
+
+.privacy-notice {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+}
+
+/* Touch Target Polish */
+@media (max-width: 600px) {
+  .terminal-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab-list {
+    justify-content: space-between;
+  }
+
+  .nav-tab {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 1rem 0.6rem;
+    font-size: 1.2rem;
+    min-height: 44px;
+  }
+
+  .active-player-pill {
+    text-align: center;
+  }
+}
