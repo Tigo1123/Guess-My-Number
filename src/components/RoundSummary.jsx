@@ -8,6 +8,8 @@ export function RoundSummary({
   attempts,
   secretNumber,
   timeRemaining,
+  hintsUsed,
+  unlockedThisRound = [],
 }) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
@@ -45,6 +47,10 @@ export function RoundSummary({
           <span className="summary-value">{attempts}</span>
         </div>
         <div className="summary-item">
+          <span className="summary-label">HINTS USED:</span>
+          <span className="summary-value">{hintsUsed}</span>
+        </div>
+        <div className="summary-item">
           <span className="summary-label">SECRET NUMBER:</span>
           <span className="summary-value">{secretNumber}</span>
         </div>
@@ -53,6 +59,14 @@ export function RoundSummary({
             <span className="summary-label">TIME METRIC:</span>
             <span className="summary-value">
               {timeRemaining === 0 ? 'TIME EXPIRED' : `${timeRemaining}s LEFT`}
+            </span>
+          </div>
+        )}
+        {unlockedThisRound.length > 0 && (
+          <div className="summary-item full-width">
+            <span className="summary-label">ACHIEVEMENTS UNLOCKED:</span>
+            <span className="summary-value win">
+              🏆 {unlockedThisRound.join(', ')}
             </span>
           </div>
         )}

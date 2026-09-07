@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { DIFFICULTIES, DEFAULT_DIFFICULTY } from '../constants/difficulty';
+import { ACHIEVEMENTS, ACHIEVEMENT_IDS } from '../constants/achievements';
 import { useLocalStorage } from './useLocalStorage';
 
 function generateSecretNumber(maxNumber) {
@@ -109,6 +110,14 @@ export function sanitizeBestAttempts(raw) {
   };
 }
 
+export function sanitizeAchievements(raw) {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const validSet = new Set(ACHIEVEMENT_IDS);
+  return Array.from(new Set(raw.filter((id) => typeof id === 'string' && validSet.has(id))));
+}
+
 export function useGameState() {
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY);
   const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed'
@@ -143,6 +152,13 @@ export function useGameState() {
     sanitizeBestAttempts
   );
 
+  // Persistent achievements in localStorage
+  const [achievements, setAchievements] = useLocalStorage(
+    'guess_my_number_achievements',
+    [],
+    sanitizeAchievements
+  );
+
   const [secretNumber, setSecretNumber] = useState(() => generateSecretNumber(config.maxNumber));
   const [score, setScore] = useState(config.startingScore);
   const [status, setStatus] = useState('PLAYING'); // 'PLAYING' | 'WON' | 'LOST'
@@ -154,6 +170,17 @@ export function useGameState() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [resetToken, setResetToken] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(config.timedDuration);
+
+  // Phase 8 Hints & Achievements state
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [currentHint, setCurrentHint] = useState(null);
+  const [lastHintCategory, setLastHintCategory] = useState(null);
+  const [unlockedThisRound, setUnlockedThisRound] = useState([]);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Hint Cost per difficulty
+  const hintCost = difficulty === 'hard' ? 1 : 2;
+  const canAffordHint = score - hintCost >= 1;
 
   // Active difficulty high score
   const currentHighScore = highScores[difficulty] || 0;
@@ -173,6 +200,11 @@ export function useGameState() {
     setProximity(null);
     setIsInvalid(false);
     setTimeRemaining(targetConfig.timedDuration);
+    setHintsUsed(0);
+    setCurrentHint(null);
+    setLastHintCategory(null);
+    setUnlockedThisRound([]);
+    setToastMessage(null);
     setResetToken((prev) => prev + 1);
   }, [difficulty, gameMode]);
 
@@ -198,6 +230,54 @@ export function useGameState() {
     }
   }, [isInvalid]);
 
+  // Check and unlock achievements helper
+  const evaluateAchievements = useCallback((context) => {
+    const {
+      isWin,
+      finalAttempts,
+      newCurrentStreak,
+      totalGamesCount,
+      totalWinsCount,
+      difficultyLevel,
+      mode,
+      remainingTime,
+      hintsCount,
+    } = context;
+
+    const currentUnlocked = new Set(achievements);
+    const newUnlocks = [];
+
+    const tryUnlock = (id) => {
+      if (!currentUnlocked.has(id)) {
+        currentUnlocked.add(id);
+        const achDef = ACHIEVEMENTS.find((a) => a.id === id);
+        if (achDef) {
+          newUnlocks.push(achDef.title);
+        }
+      }
+    };
+
+    if (isWin) {
+      if (totalWinsCount >= 1) tryUnlock('FIRST_WIN');
+      if (newCurrentStreak >= 3) tryUnlock('ON_FIRE');
+      if (finalAttempts === 1) tryUnlock('PERFECT_GUESS');
+      if (finalAttempts <= 3) tryUnlock('SHARPSHOOTER');
+      if (mode === 'timed' && remainingTime >= DIFFICULTIES[difficultyLevel].timedDuration / 2) {
+        tryUnlock('SPEED_DEMON');
+      }
+      if (difficultyLevel === 'hard') tryUnlock('HARD_MODE_HERO');
+      if (hintsCount === 0) tryUnlock('NO_HELP_NEEDED');
+    }
+
+    if (totalGamesCount >= 10) tryUnlock('VETERAN');
+
+    if (newUnlocks.length > 0) {
+      setAchievements(Array.from(currentUnlocked));
+      setUnlockedThisRound((prev) => [...prev, ...newUnlocks]);
+      setToastMessage(newUnlocks[newUnlocks.length - 1]);
+    }
+  }, [achievements, setAchievements]);
+
   // Timer Expiration Callback
   const handleTimerExpired = useCallback(() => {
     if (status !== 'PLAYING') return;
@@ -215,9 +295,24 @@ export function useGameState() {
     // Update statistics exactly once for timed loss
     setStatistics((prev) => {
       const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
+      const nextTotalGames = prev.totalGames + 1;
+      const nextTotalWins = prev.totalWins;
+
+      evaluateAchievements({
+        isWin: false,
+        finalAttempts: attempts,
+        newCurrentStreak: 0,
+        totalGamesCount: nextTotalGames,
+        totalWinsCount: nextTotalWins,
+        difficultyLevel: difficulty,
+        mode: gameMode,
+        remainingTime: 0,
+        hintsCount: hintsUsed,
+      });
+
       return {
         ...prev,
-        totalGames: prev.totalGames + 1,
+        totalGames: nextTotalGames,
         totalLosses: prev.totalLosses + 1,
         byDifficulty: {
           ...prev.byDifficulty,
@@ -229,7 +324,7 @@ export function useGameState() {
         },
       };
     });
-  }, [difficulty, setStatistics, setStreak, status]);
+  }, [attempts, difficulty, evaluateAchievements, gameMode, hintsUsed, setStatistics, setStreak, status]);
 
   // Timed Mode Countdown Effect
   useEffect(() => {
@@ -251,12 +346,64 @@ export function useGameState() {
     return () => clearInterval(timerId);
   }, [gameMode, status, handleTimerExpired]);
 
-  // Reset Statistics, Streaks, and Best Attempts (High Scores unaffected)
+  // Reset Statistics, Streaks, and Best Attempts (High Scores & Achievements unaffected)
   const resetStatistics = useCallback(() => {
     setStatistics(INITIAL_STATISTICS);
     setStreak(INITIAL_STREAK);
     setBestAttempts(INITIAL_BEST_ATTEMPTS);
   }, [setBestAttempts, setStatistics, setStreak]);
+
+  // Get Hint Callback
+  const getHint = useCallback(() => {
+    if (status !== 'PLAYING') return;
+    if (score - hintCost < 1) return;
+
+    // Deduct cost and increment hints used
+    setScore((prev) => prev - hintCost);
+    setHintsUsed((prev) => prev + 1);
+
+    // Categories: 'parity', 'range', 'divisibility'
+    const isEven = secretNumber % 2 === 0;
+    const parityText = `The secret number is ${isEven ? 'EVEN' : 'ODD'}.`;
+
+    // Calculate range
+    const rangeStep = 10;
+    const rangeStart = Math.max(1, Math.floor((secretNumber - 1) / rangeStep) * rangeStep + 1);
+    const rangeEnd = Math.min(config.maxNumber, rangeStart + rangeStep - 1);
+    const rangeText = `The number is between ${rangeStart} and ${rangeEnd}.`;
+
+    // Divisibility hint (if 5 or 3)
+    let divText = null;
+    if (secretNumber % 5 === 0) {
+      divText = 'The number is divisible by 5.';
+    } else if (secretNumber % 3 === 0) {
+      divText = 'The number is divisible by 3.';
+    }
+
+    let nextCategory = 'parity';
+    if (lastHintCategory === 'parity') {
+      nextCategory = 'range';
+    } else if (lastHintCategory === 'range') {
+      nextCategory = divText ? 'divisibility' : 'parity';
+    } else {
+      nextCategory = 'parity';
+    }
+
+    let hintText = parityText;
+    if (nextCategory === 'range') {
+      hintText = rangeText;
+    } else if (nextCategory === 'divisibility' && divText) {
+      hintText = divText;
+    }
+
+    // Guard against identical repeat if different available
+    if (hintText === currentHint) {
+      hintText = parityText !== currentHint ? parityText : rangeText;
+    }
+
+    setLastHintCategory(nextCategory);
+    setCurrentHint(hintText);
+  }, [config.maxNumber, currentHint, hintCost, lastHintCategory, score, secretNumber, status]);
 
   // Make Guess
   const makeGuess = useCallback((rawGuess) => {
@@ -301,11 +448,13 @@ export function useGameState() {
         [difficulty]: Math.max(prev[difficulty] || 0, score),
       }));
 
-      // Update win streak
+      // Calculate new streak
+      let nextCurrentStreak = 0;
+      let nextBestStreak = 0;
       setStreak((prev) => {
-        const nextCurrent = prev.currentStreak + 1;
-        const nextBest = Math.max(prev.bestStreak, nextCurrent);
-        return { currentStreak: nextCurrent, bestStreak: nextBest };
+        nextCurrentStreak = prev.currentStreak + 1;
+        nextBestStreak = Math.max(prev.bestStreak, nextCurrentStreak);
+        return { currentStreak: nextCurrentStreak, bestStreak: nextBestStreak };
       });
 
       // Update best attempts for active difficulty
@@ -315,13 +464,28 @@ export function useGameState() {
         return { ...prev, [difficulty]: nextBest };
       });
 
-      // Update statistics exactly once for winning game end
+      // Update statistics & check achievements exactly once for winning game end
       setStatistics((prev) => {
         const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
+        const nextTotalGames = prev.totalGames + 1;
+        const nextTotalWins = prev.totalWins + 1;
+
+        evaluateAchievements({
+          isWin: true,
+          finalAttempts: newAttempts,
+          newCurrentStreak: nextCurrentStreak,
+          totalGamesCount: nextTotalGames,
+          totalWinsCount: nextTotalWins,
+          difficultyLevel: difficulty,
+          mode: gameMode,
+          remainingTime: timeRemaining,
+          hintsCount: hintsUsed,
+        });
+
         return {
           ...prev,
-          totalGames: prev.totalGames + 1,
-          totalWins: prev.totalWins + 1,
+          totalGames: nextTotalGames,
+          totalWins: nextTotalWins,
           totalValidGuesses: prev.totalValidGuesses + 1,
           byDifficulty: {
             ...prev.byDifficulty,
@@ -353,12 +517,27 @@ export function useGameState() {
       // Reset streak on loss
       setStreak((prev) => ({ ...prev, currentStreak: 0 }));
 
-      // Update statistics exactly once for losing game end
+      // Update statistics & check achievements exactly once for losing game end
       setStatistics((prev) => {
         const diffStats = prev.byDifficulty[difficulty] || { games: 0, wins: 0, losses: 0 };
+        const nextTotalGames = prev.totalGames + 1;
+        const nextTotalWins = prev.totalWins;
+
+        evaluateAchievements({
+          isWin: false,
+          finalAttempts: newAttempts,
+          newCurrentStreak: 0,
+          totalGamesCount: nextTotalGames,
+          totalWinsCount: nextTotalWins,
+          difficultyLevel: difficulty,
+          mode: gameMode,
+          remainingTime: timeRemaining,
+          hintsCount: hintsUsed,
+        });
+
         return {
           ...prev,
-          totalGames: prev.totalGames + 1,
+          totalGames: nextTotalGames,
           totalLosses: prev.totalLosses + 1,
           totalValidGuesses: prev.totalValidGuesses + 1,
           byDifficulty: {
@@ -381,7 +560,7 @@ export function useGameState() {
         totalValidGuesses: prev.totalValidGuesses + 1,
       }));
     }
-  }, [attempts, config.maxNumber, difficulty, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status]);
+  }, [attempts, config.maxNumber, difficulty, evaluateAchievements, gameMode, hintsUsed, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
 
   return {
     difficulty,
@@ -402,10 +581,18 @@ export function useGameState() {
     statistics,
     streak,
     bestAttempts,
+    achievements,
     timeRemaining,
+    hintsUsed,
+    currentHint,
+    hintCost,
+    canAffordHint,
+    unlockedThisRound,
+    toastMessage,
     changeDifficulty,
     changeGameMode,
     makeGuess,
+    getHint,
     resetGame,
     resetStatistics,
   };
