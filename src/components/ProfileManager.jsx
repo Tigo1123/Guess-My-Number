@@ -226,26 +226,28 @@ export function ProfileManager({
 
       {activePanel === 'rename' && (
         <form className="profile-panel-box" onSubmit={handleRenameSubmit} aria-label="Rename Player Profile Form">
-          <h3 className="panel-title">RENAME PLAYER: {activeName}</h3>
-          <div className="form-group">
-            <label htmlFor="rename-player-name-input">New Name:</label>
+          <h3 className="panel-title">Rename Player: {activeName}</h3>
+          <div className="form-group-field">
+            <label htmlFor="rename-player-name-input" className="field-label">
+              New Name
+            </label>
             <input
               id="rename-player-name-input"
               type="text"
-              className="terminal-input"
+              className={`terminal-input ${errorMessage ? 'has-error' : ''}`}
               maxLength={20}
               value={inputName}
               onChange={(e) => {
                 setInputName(e.target.value);
                 setErrorMessage('');
               }}
-              placeholder="Enter new name (1-20 chars)"
+              placeholder="Enter new name (1-20 characters)"
               autoFocus
             />
           </div>
 
           {errorMessage && (
-            <div className="profile-error-message" role="alert">
+            <div className="profile-error-message inline-error" role="alert">
               {errorMessage}
             </div>
           )}

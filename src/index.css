@@ -1495,22 +1495,22 @@ button:disabled {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--space-xs) var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     margin-bottom: var(--space-sm);
   }
 
   .leaderboard-table tr.active-profile-row {
-    border-color: var(--accent);
-    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    background: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.08);
   }
 
-  .leaderboard-table td,
-  .history-table td {
+  .leaderboard-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    padding: 0.6rem 0;
+    padding: 0.65rem 0.4rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     white-space: normal;
     text-align: right;
@@ -1636,6 +1636,23 @@ button:disabled {
     font-size: 1.2rem;
   }
 
+  .leaderboard-filter-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .leaderboard-filter-tabs .tab-btn {
+    width: 100%;
+    min-width: 0;
+    padding: 0.6rem 0.2rem;
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    text-align: center;
+    justify-content: center;
+  }
+
   /* Play Page Mobile Spacing */
   .secret-number-container {
     padding: var(--space-md) var(--space-sm);
@@ -1720,6 +1737,20 @@ button:disabled {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+  }
+
+  .panel-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .panel-form-actions button {
+    flex: 1 1 calc(50% - 0.6rem);
+    min-width: 0;
   }
 
   .player-card-actions {
