@@ -8,6 +8,7 @@ import {
 } from '../utils/dailyChallenge';
 import { useLocalStorage } from './useLocalStorage';
 import { usePlayerProfiles } from './usePlayerProfiles';
+import { sanitizeGameHistory, generateUUID } from '../utils/profileStorage';
 
 function generateSecretNumber(maxNumber) {
   return Math.trunc(Math.random() * maxNumber) + 1;
@@ -205,6 +206,7 @@ export function useGameState() {
   const achievements = useMemo(() => sanitizeAchievements(activeProgress.achievements), [activeProgress.achievements]);
   const dailyChallengeHistory = useMemo(() => sanitizeDailyChallengeHistory(activeProgress.dailyChallengeHistory), [activeProgress.dailyChallengeHistory]);
   const dailyStreak = useMemo(() => sanitizeDailyStreak(activeProgress.dailyStreak), [activeProgress.dailyStreak]);
+  const gameHistory = useMemo(() => sanitizeGameHistory(activeProgress.gameHistory), [activeProgress.gameHistory]);
 
   // Profile-scoped progress setters
   const setHighScores = useCallback((updater) => {
@@ -255,6 +257,17 @@ export function useGameState() {
       dailyStreak: typeof updater === 'function' ? updater(prev.dailyStreak) : updater,
     }));
   }, [updateActiveProgress]);
+
+  const setGameHistory = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      gameHistory: sanitizeGameHistory(typeof updater === 'function' ? updater(prev.gameHistory) : updater),
+    }));
+  }, [updateActiveProgress]);
+
+  const clearGameHistory = useCallback(() => {
+    setGameHistory([]);
+  }, [setGameHistory]);
 
   // Sync legacy localStorage keys for backward compatibility
   useEffect(() => {
@@ -401,10 +414,12 @@ export function useGameState() {
 
     const currentUnlocked = new Set(achievements);
     const newUnlocks = [];
+    const newUnlockIds = [];
 
     const tryUnlock = (id) => {
       if (!currentUnlocked.has(id)) {
         currentUnlocked.add(id);
+        newUnlockIds.push(id);
         const achDef = ACHIEVEMENTS.find((a) => a.id === id);
         if (achDef) {
           newUnlocks.push(achDef.title);
@@ -437,7 +452,35 @@ export function useGameState() {
       setUnlockedThisRound((prev) => [...prev, ...newUnlocks]);
       setToastMessage(newUnlocks[newUnlocks.length - 1]);
     }
+
+    return newUnlockIds;
   }, [achievements, setAchievements]);
+
+  // Add History Entry Helper
+  const addHistoryEntry = useCallback((entryData) => {
+    const nextEntry = {
+      id: generateUUID(),
+      playedAt: new Date().toISOString(),
+      result: entryData.result,
+      difficulty: entryData.difficulty || difficulty,
+      mode: entryData.mode || gameMode,
+      score: entryData.score ?? score,
+      attempts: entryData.attempts ?? attempts,
+      hintsUsed: entryData.hintsUsed ?? hintsUsed,
+      secretNumber: entryData.secretNumber ?? secretNumber,
+      validGuesses: entryData.validGuesses || [],
+      timeRemaining: entryData.timeRemaining ?? (gameMode === 'timed' ? Math.max(0, timeRemaining) : null),
+      maxTime: entryData.maxTime ?? (gameMode === 'timed' ? DIFFICULTIES[difficulty].timedDuration : null),
+      maxAttempts: entryData.maxAttempts ?? (gameMode === 'limited' ? DIFFICULTIES[difficulty].maxAttempts : null),
+      attemptsRemaining: entryData.attemptsRemaining ?? (gameMode === 'limited' ? Math.max(0, DIFFICULTIES[difficulty].maxAttempts - (entryData.attempts ?? attempts)) : null),
+      isDailyChallenge: Boolean(isDailyChallengeActive),
+      dailyChallengeType: isDailyChallengeActive ? (isPracticeReplay ? 'practice' : 'official') : null,
+      dailyDateKey: isDailyChallengeActive ? todayKey : null,
+      achievementsUnlocked: entryData.achievementsUnlocked || [],
+    };
+
+    setGameHistory((prev) => sanitizeGameHistory([...(prev || []), nextEntry]));
+  }, [attempts, difficulty, gameMode, hintsUsed, isDailyChallengeActive, isPracticeReplay, score, secretNumber, setGameHistory, timeRemaining, todayKey]);
 
   // Process Official Daily Completion Result
   const handleOfficialDailyCompletion = useCallback((isWin, finalAttempts, finalScore) => {
@@ -495,7 +538,7 @@ export function useGameState() {
       const nextTotalGames = prev.totalGames + 1;
       const nextTotalWins = prev.totalWins;
 
-      evaluateAchievements({
+      const unlockedIds = evaluateAchievements({
         isWin: false,
         finalAttempts: attempts,
         newCurrentStreak: 0,
@@ -507,6 +550,17 @@ export function useGameState() {
         hintsCount: hintsUsed,
         isOfficialDaily,
         nextDailyStreakCount: nextDailyStreakCount || 0,
+      });
+
+      addHistoryEntry({
+        result: 'LOSS',
+        score: 0,
+        attempts: attempts,
+        hintsUsed: hintsUsed,
+        secretNumber,
+        validGuesses: guessHistory.map((g) => g.guess),
+        timeRemaining: 0,
+        achievementsUnlocked: unlockedIds || [],
       });
 
       return {
@@ -669,7 +723,7 @@ export function useGameState() {
         const nextTotalGames = prev.totalGames + 1;
         const nextTotalWins = prev.totalWins + 1;
 
-        evaluateAchievements({
+        const unlockedIds = evaluateAchievements({
           isWin: true,
           finalAttempts: newAttempts,
           newCurrentStreak: nextCurrentStreak,
@@ -681,6 +735,19 @@ export function useGameState() {
           hintsCount: hintsUsed,
           isOfficialDaily,
           nextDailyStreakCount: nextDailyStreakCount || 0,
+        });
+
+        const winGuesses = [...guessHistory, { guess: num, result: 'Correct' }].map((g) => g.guess);
+        addHistoryEntry({
+          result: 'WIN',
+          score: score,
+          attempts: newAttempts,
+          hintsUsed: hintsUsed,
+          secretNumber,
+          validGuesses: winGuesses,
+          timeRemaining: gameMode === 'timed' ? Math.max(0, timeRemaining) : null,
+          attemptsRemaining: gameMode === 'limited' ? Math.max(0, config.maxAttempts - newAttempts) : null,
+          achievementsUnlocked: unlockedIds || [],
         });
 
         return {
@@ -735,7 +802,7 @@ export function useGameState() {
         const nextTotalGames = prev.totalGames + 1;
         const nextTotalWins = prev.totalWins;
 
-        evaluateAchievements({
+        const unlockedIds = evaluateAchievements({
           isWin: false,
           finalAttempts: newAttempts,
           newCurrentStreak: 0,
@@ -747,6 +814,19 @@ export function useGameState() {
           hintsCount: hintsUsed,
           isOfficialDaily,
           nextDailyStreakCount: nextDailyStreakCount || 0,
+        });
+
+        const lossGuesses = [...guessHistory, { guess: num, result: resultLabel }].map((g) => g.guess);
+        addHistoryEntry({
+          result: 'LOSS',
+          score: lossScore,
+          attempts: newAttempts,
+          hintsUsed: hintsUsed,
+          secretNumber,
+          validGuesses: lossGuesses,
+          timeRemaining: gameMode === 'timed' ? Math.max(0, timeRemaining) : null,
+          attemptsRemaining: gameMode === 'limited' ? 0 : null,
+          achievementsUnlocked: unlockedIds || [],
         });
 
         return {
@@ -808,6 +888,8 @@ export function useGameState() {
     isCompletedToday,
     todayResult,
     dailyStreak,
+    gameHistory,
+    clearGameHistory,
     isDailyChallengeActive,
     isPracticeReplay,
     profiles,

@@ -48,6 +48,70 @@ export function validateProfileName(name, existingProfiles = [], currentProfileI
   return { valid: true, name: trimmed };
 }
 
+function sanitizeNonNegativeInt(val) {
+  if (typeof val === 'number' && Number.isFinite(val) && Number.isInteger(val) && val >= 0) {
+    return val;
+  }
+  return 0;
+}
+
+export function sanitizeGameHistory(raw) {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  const validEntries = [];
+
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+
+    const id = typeof entry.id === 'string' && entry.id.trim() ? entry.id.trim() : generateUUID();
+    const playedAt = typeof entry.playedAt === 'string' && entry.playedAt ? entry.playedAt : new Date().toISOString();
+    const result = entry.result === 'WIN' ? 'WIN' : 'LOSS';
+    const difficulty = ['easy', 'medium', 'hard'].includes(entry.difficulty) ? entry.difficulty : 'easy';
+    const mode = ['classic', 'timed', 'limited'].includes(entry.mode) ? entry.mode : 'classic';
+    const score = sanitizeNonNegativeInt(entry.score);
+    const attempts = sanitizeNonNegativeInt(entry.attempts);
+    const hintsUsed = sanitizeNonNegativeInt(entry.hintsUsed);
+    const secretNumber = typeof entry.secretNumber === 'number' && entry.secretNumber > 0 ? entry.secretNumber : 1;
+    const validGuesses = Array.isArray(entry.validGuesses)
+      ? entry.validGuesses.filter((n) => typeof n === 'number' && Number.isInteger(n))
+      : [];
+    const timeRemaining = typeof entry.timeRemaining === 'number' && entry.timeRemaining >= 0 ? entry.timeRemaining : null;
+    const maxTime = typeof entry.maxTime === 'number' && entry.maxTime > 0 ? entry.maxTime : null;
+    const maxAttempts = typeof entry.maxAttempts === 'number' && entry.maxAttempts > 0 ? entry.maxAttempts : null;
+    const attemptsRemaining = typeof entry.attemptsRemaining === 'number' && entry.attemptsRemaining >= 0 ? entry.attemptsRemaining : null;
+    const isDailyChallenge = Boolean(entry.isDailyChallenge);
+    const dailyChallengeType = ['official', 'practice'].includes(entry.dailyChallengeType) ? entry.dailyChallengeType : null;
+    const dailyDateKey = typeof entry.dailyDateKey === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(entry.dailyDateKey) ? entry.dailyDateKey : null;
+    const achievementsUnlocked = sanitizeAchievements(entry.achievementsUnlocked);
+
+    validEntries.push({
+      id,
+      playedAt,
+      result,
+      difficulty,
+      mode,
+      score,
+      attempts,
+      hintsUsed,
+      secretNumber,
+      validGuesses,
+      timeRemaining,
+      maxTime,
+      maxAttempts,
+      attemptsRemaining,
+      isDailyChallenge,
+      dailyChallengeType,
+      dailyDateKey,
+      achievementsUnlocked,
+    });
+  }
+
+  // Keep latest 100 entries only
+  return validEntries.slice(-100);
+}
+
 export function createEmptyProgress() {
   return {
     highScores: { easy: 0, medium: 0, hard: 0 },
@@ -57,6 +121,7 @@ export function createEmptyProgress() {
     achievements: [],
     dailyChallengeHistory: {},
     dailyStreak: { ...INITIAL_DAILY_STREAK },
+    gameHistory: [],
   };
 }
 
@@ -73,6 +138,7 @@ export function sanitizeProgress(raw) {
     achievements: sanitizeAchievements(raw.achievements),
     dailyChallengeHistory: sanitizeDailyChallengeHistory(raw.dailyChallengeHistory),
     dailyStreak: sanitizeDailyStreak(raw.dailyStreak),
+    gameHistory: sanitizeGameHistory(raw.gameHistory),
   };
 }
 
