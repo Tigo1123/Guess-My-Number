@@ -14,30 +14,29 @@ describe('Phase 12 — Release Polish & Readiness Tests', () => {
   describe('1. Information Architecture & Navigation', () => {
     it('defaults to the PLAY tab view on startup', () => {
       render(<App />);
-      const playTab = screen.getByRole('tab', { name: /🎮 PLAY/i });
+      const playTab = screen.getByRole('tab', { name: /^Play$/i });
       expect(playTab).toHaveAttribute('aria-selected', 'true');
     });
 
     it('switches navigation tabs when clicked and updates tabpanel visibility', () => {
       render(<App />);
 
-      const statsTab = screen.getByRole('tab', { name: /📊 STATS/i });
+      const statsTab = screen.getByRole('tab', { name: /^Stats$/i });
       fireEvent.click(statsTab);
       expect(statsTab).toHaveAttribute('aria-selected', 'true');
 
-      const historyTab = screen.getByRole('tab', { name: /📜 HISTORY/i });
+      const historyTab = screen.getByRole('tab', { name: /^History$/i });
       fireEvent.click(historyTab);
       expect(historyTab).toHaveAttribute('aria-selected', 'true');
 
-      const playersTab = screen.getByRole('tab', { name: /👤 PLAYERS/i });
+      const playersTab = screen.getByRole('tab', { name: /^Players$/i });
       fireEvent.click(playersTab);
       expect(playersTab).toHaveAttribute('aria-selected', 'true');
 
-      const settingsTab = screen.getByRole('tab', { name: /⚙️ SETTINGS/i });
+      const settingsTab = screen.getByRole('tab', { name: /^Settings$/i });
       fireEvent.click(settingsTab);
       expect(settingsTab).toHaveAttribute('aria-selected', 'true');
     });
-
 
     it('displays active profile indicator banner', () => {
       render(<App />);
@@ -52,8 +51,9 @@ describe('Phase 12 — Release Polish & Readiness Tests', () => {
 
     it('displays version 1.0.0 and data privacy notice in SETTINGS view', () => {
       render(<App />);
-      const settingsTab = screen.getByRole('tab', { name: /⚙️ SETTINGS/i });
+      const settingsTab = screen.getByRole('tab', { name: /^Settings$/i });
       fireEvent.click(settingsTab);
+
 
       expect(screen.getByText(/v1.0.0/i)).toBeInTheDocument();
       expect(screen.getByText(/Data Privacy:/i)).toBeInTheDocument();

@@ -7,10 +7,10 @@ export function TimerDisplay({ timeRemaining, isTimedMode }) {
   const isWarning = timeRemaining <= 10;
 
   return (
-    <div className="timer-container" aria-label="Remaining Time">
-      <span className="timer-label">TIME REMAINING:</span>
+    <div className="timer-container metric-card" aria-label="Remaining Time">
+      <span className="metric-label">Time Remaining</span>
       <span
-        className={`timer-value ${isCritical ? 'critical' : isWarning ? 'warning' : ''}`}
+        className={`metric-value ${isCritical ? 'critical' : isWarning ? 'warning' : ''}`}
       >
         {timeRemaining}s
       </span>

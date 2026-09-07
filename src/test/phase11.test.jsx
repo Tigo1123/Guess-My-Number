@@ -257,8 +257,8 @@ describe('Phase 11 — Game History, Replay Analytics & Personal Records', () =>
         />
       );
 
-      expect(screen.getByText('HIGHEST SCORE WIN')).toBeInTheDocument();
-      expect(screen.getByText('18')).toBeInTheDocument(); // Highest score win
+      expect(screen.getByText(/Highest Score/i)).toBeInTheDocument();
+      expect(screen.getByText('18')).toBeInTheDocument(); // Highest score value
       expect(screen.getByText('45s left')).toBeInTheDocument(); // Fastest timed win
     });
   });
@@ -308,7 +308,7 @@ describe('Phase 11 — Game History, Replay Analytics & Personal Records', () =>
 
       expect(screen.getByText(/GAME REPLAY ANALYSIS/i)).toBeInTheDocument();
       expect(screen.getByText(/Distance from secret: 5/i)).toBeInTheDocument();
-      expect(screen.getByText('Correct 🎉')).toBeInTheDocument();
+      expect(screen.getByText(/Correct/i)).toBeInTheDocument();
     });
 
     it('renders GameHistory table with accessible caption and clear history control label', () => {

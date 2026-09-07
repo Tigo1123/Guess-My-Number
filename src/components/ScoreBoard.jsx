@@ -2,20 +2,20 @@ import React from 'react';
 
 export function ScoreBoard({ score, highScore, attempts }) {
   return (
-    <section className="score-board">
-      <div className="score-box">
-        <div className="label">SCORE</div>
-        <div className="value score">{score}</div>
+    <section className="score-board metrics-grid" aria-label="Score Metrics">
+      <div className="metric-card">
+        <span className="metric-label">Score</span>
+        <span className="metric-value accent">{score}</span>
       </div>
 
-      <div className="score-box">
-        <div className="label">HIGHSCORE</div>
-        <div className="value highscore">{highScore}</div>
+      <div className="metric-card">
+        <span className="metric-label">Best</span>
+        <span className="metric-value">{highScore}</span>
       </div>
 
-      <div className="score-box attempts-box">
-        <div className="label">ATTEMPTS</div>
-        <div className="value attempts">{attempts}</div>
+      <div className="metric-card">
+        <span className="metric-label">Attempts</span>
+        <span className="metric-value">{attempts}</span>
       </div>
     </section>
   );

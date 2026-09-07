@@ -13,14 +13,13 @@ export function GameHistoryDetails({ entry, onClose }) {
 
   if (!entry) return null;
 
-
   const dateStr = entry.playedAt ? new Date(entry.playedAt).toLocaleString() : 'Unknown Date';
   const isWin = entry.result === 'WIN';
 
   const formatDistance = (guessVal, secretVal) => {
     const dist = Math.abs(guessVal - secretVal);
-    if (guessVal === secretVal) return 'Correct 🎉';
-    const direction = guessVal > secretVal ? 'Too High 📉' : 'Too Low 📈';
+    if (guessVal === secretVal) return 'Correct';
+    const direction = guessVal > secretVal ? 'Too High' : 'Too Low';
     return `${direction} (Distance from secret: ${dist})`;
   };
 
@@ -62,7 +61,7 @@ export function GameHistoryDetails({ entry, onClose }) {
             <div className="meta-item full">
               <span>Daily Challenge:</span>{' '}
               <strong>
-                {entry.dailyChallengeType === 'official' ? '⭐ Official Challenge' : '🎮 Practice Replay'} [{entry.dailyDateKey}]
+                {entry.dailyChallengeType === 'official' ? 'Official Challenge' : 'Practice Replay'} [{entry.dailyDateKey}]
               </strong>
             </div>
           )}
@@ -85,13 +84,13 @@ export function GameHistoryDetails({ entry, onClose }) {
           {entry.achievementsUnlocked && entry.achievementsUnlocked.length > 0 && (
             <div className="meta-item full">
               <span>Achievements Unlocked:</span>{' '}
-              <strong className="achieve-text">🏆 {entry.achievementsUnlocked.join(', ')}</strong>
+              <strong className="achieve-text">{entry.achievementsUnlocked.join(', ')}</strong>
             </div>
           )}
         </div>
 
         <div className="details-sequence-section">
-          <h4 className="sequence-title">GUESS SEQUENCE ANALYSIS</h4>
+          <h4 className="sequence-title">Guess Sequence Analysis</h4>
           {entry.validGuesses && entry.validGuesses.length > 0 ? (
             <ol className="guess-sequence-list">
               {entry.validGuesses.map((guessVal, index) => (

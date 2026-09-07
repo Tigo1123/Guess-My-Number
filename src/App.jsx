@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { ModeSelector } from './components/ModeSelector';
 import { DifficultySelector } from './components/DifficultySelector';
@@ -90,10 +90,12 @@ export function App() {
   const {
     soundEnabled,
     toggleSound,
+    initAudioOnUserGesture,
     playCorrect,
     playWrong,
     playAchievement,
     playTimeWarning,
+    playHint,
   } = useSoundEffects();
 
   const isGameOver = status !== 'PLAYING';
@@ -106,6 +108,14 @@ export function App() {
       playWrong();
     }
   }, [playCorrect, playWrong, status]);
+
+  const prevAttemptsRef = useRef(attempts);
+  useEffect(() => {
+    if (attempts > prevAttemptsRef.current && status === 'PLAYING') {
+      playWrong();
+    }
+    prevAttemptsRef.current = attempts;
+  }, [attempts, status, playWrong]);
 
   useEffect(() => {
     if (toastMessage) {
@@ -132,7 +142,14 @@ export function App() {
   }, [difficulty, status]);
 
   const handleGuessSubmit = (rawGuess) => {
+    initAudioOnUserGesture();
     makeGuess(rawGuess);
+  };
+
+  const handleGetHint = () => {
+    initAudioOnUserGesture();
+    getHint();
+    playHint();
   };
 
   return (
@@ -141,7 +158,7 @@ export function App() {
 
       <Header />
 
-      <nav className="terminal-nav" aria-label="Main Navigation">
+      <nav className="app-nav" aria-label="Main Navigation">
         <div className="tab-list" role="tablist">
           <button
             id="tab-play"
@@ -152,7 +169,7 @@ export function App() {
             className={`nav-tab ${activeTab === 'PLAY' ? 'active' : ''}`}
             onClick={() => setActiveTab('PLAY')}
           >
-            🎮 PLAY
+            Play
           </button>
           <button
             id="tab-stats"
@@ -163,7 +180,7 @@ export function App() {
             className={`nav-tab ${activeTab === 'STATS' ? 'active' : ''}`}
             onClick={() => setActiveTab('STATS')}
           >
-            📊 STATS
+            Stats
           </button>
           <button
             id="tab-history"
@@ -174,7 +191,7 @@ export function App() {
             className={`nav-tab ${activeTab === 'HISTORY' ? 'active' : ''}`}
             onClick={() => setActiveTab('HISTORY')}
           >
-            📜 HISTORY
+            History
           </button>
           <button
             id="tab-players"
@@ -185,7 +202,7 @@ export function App() {
             className={`nav-tab ${activeTab === 'PLAYERS' ? 'active' : ''}`}
             onClick={() => setActiveTab('PLAYERS')}
           >
-            👤 PLAYERS
+            Players
           </button>
           <button
             id="tab-settings"
@@ -196,11 +213,14 @@ export function App() {
             className={`nav-tab ${activeTab === 'SETTINGS' ? 'active' : ''}`}
             onClick={() => setActiveTab('SETTINGS')}
           >
-            ⚙️ SETTINGS
+            Settings
           </button>
         </div>
         <div className="active-player-pill" title="Active Player">
-          👤 <span className="player-name">{activeProfile ? activeProfile.name : 'Player'}</span>
+          <span className="avatar-circle">
+            {activeProfile && activeProfile.name ? activeProfile.name.charAt(0).toUpperCase() : 'P'}
+          </span>
+          <span className="player-name">{activeProfile ? activeProfile.name : 'Player'}</span>
         </div>
       </nav>
 
@@ -212,116 +232,117 @@ export function App() {
         hidden={activeTab !== 'PLAY'}
         className="tab-panel"
       >
-        <DailyChallengePanel
-          todayKey={todayKey}
-          dailyChallengeConfig={dailyChallengeConfig}
-          isCompletedToday={isCompletedToday}
-          todayResult={todayResult}
-          dailyStreak={dailyStreak}
-          isDailyChallengeActive={isDailyChallengeActive}
-          isPracticeReplay={isPracticeReplay}
-          onStartDailyChallenge={startDailyChallenge}
-          onStartPracticeReplay={startPracticeReplay}
-          onExitDailyChallenge={exitDailyChallenge}
-        />
+        <div className="play-layout-grid">
+          {/* LEFT MAIN GAME COLUMN (~65%) */}
+          <div className="game-board-column">
+            <SecretNumberDisplay
+              status={status}
+              secretNumber={secretNumber}
+            />
 
-        <div className="divider" />
+            <GameStatusMessage
+              message={message}
+              maxNumber={config.maxNumber}
+            />
 
-        <ModeSelector
-          activeMode={gameMode}
-          onSelectMode={changeGameMode}
-          disabled={isDailyChallengeActive}
-        />
+            <ProximityIndicator
+              proximity={proximity}
+            />
 
-        <div className="divider" />
+            <GuessForm
+              guessInput={guessInput}
+              onGuessChange={setGuessInput}
+              onSubmitGuess={handleGuessSubmit}
+              disabled={isGameOver}
+              isInvalid={isInvalid}
+              resetToken={resetToken}
+            />
 
-        <DifficultySelector
-          activeDifficulty={difficulty}
-          onSelectDifficulty={changeDifficulty}
-          disabled={isDailyChallengeActive}
-        />
+            <DifficultySelector
+              activeDifficulty={difficulty}
+              onSelectDifficulty={changeDifficulty}
+              disabled={isDailyChallengeActive}
+            />
 
-        <StreakDisplay
-          currentStreak={streak.currentStreak}
-          bestStreak={streak.bestStreak}
-        />
+            <ModeSelector
+              activeMode={gameMode}
+              onSelectMode={changeGameMode}
+              disabled={isDailyChallengeActive}
+            />
 
-        <TimerDisplay
-          timeRemaining={timeRemaining}
-          isTimedMode={gameMode === 'timed'}
-        />
+            <div className="game-actions-bar">
+              <HintControls
+                currentHint={currentHint}
+                hintCost={hintCost}
+                hintsUsed={hintsUsed}
+                onGetHint={handleGetHint}
+                disabled={isGameOver}
+                canAffordHint={canAffordHint}
+              />
+              <ActionControls
+                onResetGame={resetGame}
+              />
+            </div>
 
-        <AttemptsRemainingDisplay
-          attempts={attempts}
-          maxAttempts={config.maxAttempts}
-          isLimitedMode={gameMode === 'limited'}
-        />
+            <RoundSummary
+              status={status}
+              difficultyName={config.name}
+              gameMode={gameMode}
+              score={score}
+              attempts={attempts}
+              secretNumber={secretNumber}
+              timeRemaining={timeRemaining}
+              hintsUsed={hintsUsed}
+              unlockedThisRound={unlockedThisRound}
+              maxAttempts={config.maxAttempts}
+              isDailyChallengeActive={isDailyChallengeActive}
+              isPracticeReplay={isPracticeReplay}
+              todayKey={todayKey}
+            />
 
-        <div className="divider" />
+            <GuessHistory
+              history={guessHistory}
+            />
+          </div>
 
-        <SecretNumberDisplay
-          status={status}
-          secretNumber={secretNumber}
-        />
+          {/* RIGHT SIDEBAR COLUMN (~35%) */}
+          <div className="sidebar-column">
+            <DailyChallengePanel
+              todayKey={todayKey}
+              dailyChallengeConfig={dailyChallengeConfig}
+              isCompletedToday={isCompletedToday}
+              todayResult={todayResult}
+              dailyStreak={dailyStreak}
+              isDailyChallengeActive={isDailyChallengeActive}
+              isPracticeReplay={isPracticeReplay}
+              onStartDailyChallenge={startDailyChallenge}
+              onStartPracticeReplay={startPracticeReplay}
+              onExitDailyChallenge={exitDailyChallenge}
+            />
 
-        <GameStatusMessage
-          message={message}
-          maxNumber={config.maxNumber}
-        />
-
-        <ProximityIndicator
-          proximity={proximity}
-        />
-
-        <HintControls
-          currentHint={currentHint}
-          hintCost={hintCost}
-          hintsUsed={hintsUsed}
-          onGetHint={getHint}
-          disabled={isGameOver}
-          canAffordHint={canAffordHint}
-        />
-
-        <GuessForm
-          guessInput={guessInput}
-          onGuessChange={setGuessInput}
-          onSubmitGuess={handleGuessSubmit}
-          disabled={isGameOver}
-          isInvalid={isInvalid}
-          resetToken={resetToken}
-        />
-
-        <div className="divider" />
-
-        <ScoreBoard
-          score={score}
-          highScore={highScore}
-          attempts={attempts}
-        />
-
-        <RoundSummary
-          status={status}
-          difficultyName={config.name}
-          gameMode={gameMode}
-          score={score}
-          attempts={attempts}
-          secretNumber={secretNumber}
-          timeRemaining={timeRemaining}
-          hintsUsed={hintsUsed}
-          unlockedThisRound={unlockedThisRound}
-          maxAttempts={config.maxAttempts}
-          isDailyChallengeActive={isDailyChallengeActive}
-          isPracticeReplay={isPracticeReplay}
-          todayKey={todayKey}
-        />
-
-        <GuessHistory
-          history={guessHistory}
-        />
-
-        <ActionControls
-          onResetGame={resetGame}
-        />
+            <div className="metrics-card-container">
+              <h3 className="metrics-header-title">Current Game Stats</h3>
+              <ScoreBoard
+                score={score}
+                highScore={highScore}
+                attempts={attempts}
+              />
+              <StreakDisplay
+                currentStreak={streak.currentStreak}
+                bestStreak={streak.bestStreak}
+              />
+              <TimerDisplay
+                timeRemaining={timeRemaining}
+                isTimedMode={gameMode === 'timed'}
+              />
+              <AttemptsRemainingDisplay
+                attempts={attempts}
+                maxAttempts={config.maxAttempts}
+                isLimitedMode={gameMode === 'limited'}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* STATS TAB PANEL */}
@@ -330,7 +351,7 @@ export function App() {
         role="tabpanel"
         aria-labelledby="tab-stats"
         hidden={activeTab !== 'STATS'}
-        className="tab-panel"
+        className="tab-panel stats-tab-container"
       >
         <ProfileSummary
           activeProfile={activeProfile}
@@ -341,16 +362,12 @@ export function App() {
           dailyStreak={dailyStreak}
         />
 
-        <div className="divider" />
-
         <GameStatistics
           statistics={statistics}
           streak={streak}
           bestAttempts={bestAttempts}
           onResetStatistics={resetStatistics}
         />
-
-        <div className="divider" />
 
         <PersonalRecords
           statistics={statistics}
@@ -360,8 +377,6 @@ export function App() {
           dailyStreak={dailyStreak}
           history={gameHistory}
         />
-
-        <div className="divider" />
 
         <Achievements
           unlockedAchievements={achievements}
@@ -380,6 +395,7 @@ export function App() {
           history={gameHistory}
           activeProfileName={activeProfile ? activeProfile.name : 'Active Player'}
           onClearHistory={clearGameHistory}
+          onPlayRound={() => setActiveTab('PLAY')}
         />
       </div>
 
@@ -415,40 +431,62 @@ export function App() {
         role="tabpanel"
         aria-labelledby="tab-settings"
         hidden={activeTab !== 'SETTINGS'}
-        className="tab-panel"
+        className="tab-panel settings-tab-container"
       >
-        <div className="settings-section">
-          <h3>⚙️ APPLICATION SETTINGS</h3>
+        <div className="settings-cards-stack">
+          {/* 12. PREFERENCES */}
+          <section className="summary-card-block" aria-label="Game Preferences">
+            <h2 className="section-title">Preferences</h2>
+            <div className="preference-setting-row">
+              <div className="setting-info">
+                <span className="setting-label-title">Sound effects</span>
+                <p className="setting-desc-text">Play feedback sounds during the game.</p>
+              </div>
+              <button
+                type="button"
+                className={`btn-sound-toggle ${soundEnabled ? 'on' : 'off'}`}
+                aria-pressed={soundEnabled}
+                onClick={toggleSound}
+              >
+                {soundEnabled ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          </section>
 
-          <div className="sound-toggle-bar">
-            <button
-              type="button"
-              className={`btn-sound ${soundEnabled ? 'active' : ''}`}
-              aria-pressed={soundEnabled}
-              onClick={toggleSound}
-            >
-              🔊 Sound Effects: {soundEnabled ? 'ON' : 'OFF'}
-            </button>
-          </div>
-        </div>
+          {/* 11. BACKUP & RESTORE */}
+          <ProgressBackupControls
+            onExportBackup={() => triggerExport(soundEnabled)}
+            onRestoreBackup={restoreBackup}
+          />
 
-        <div className="divider" />
+          {/* 13. RESET STATISTICS (DANGER ZONE) */}
+          <section className="summary-card-block" aria-label="Reset Statistics">
+            <h2 className="section-title">Reset statistics</h2>
+            <p className="setting-desc-text">
+              Clear statistics for the active player while preserving the profile.
+            </p>
+            <div className="card-action-footer">
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={resetStatistics}
+              >
+                Reset statistics
+              </button>
+            </div>
+          </section>
 
-        <ProgressBackupControls
-          onExportBackup={() => triggerExport(soundEnabled)}
-          onRestoreBackup={restoreBackup}
-        />
-
-        <div className="divider" />
-
-        <div className="about-section retro-card">
-          <h4>ℹ️ ABOUT & RELEASE INFO</h4>
-          <p className="version-info">
-            <strong>Guess My Number</strong> — Version <span className="version-tag">v{APP_VERSION}</span>
-          </p>
-          <p className="privacy-notice">
-            🔒 <strong>Data Privacy:</strong> All game data, profiles, and statistics are stored locally in your browser's local storage. No data is collected or sent to external servers.
-          </p>
+          {/* 14. ABOUT */}
+          <section className="summary-card-block about-card" aria-label="About Application">
+            <h2 className="section-title">About</h2>
+            <div className="about-details">
+              <h3 className="about-app-name">Guess My Number</h3>
+              <span className="about-version-badge">Version v{APP_VERSION}</span>
+              <p className="about-storage-text">
+                Data Privacy: Your profiles and game progress are stored locally in this browser.
+              </p>
+            </div>
+          </section>
         </div>
       </div>
     </main>

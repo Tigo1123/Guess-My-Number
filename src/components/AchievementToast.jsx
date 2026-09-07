@@ -9,7 +9,7 @@ export function AchievementToast({ toastMessage }) {
       role="status" 
       aria-live="polite"
     >
-      <span className="toast-icon">🏆</span>
+      <span className="toast-badge">UNLOCKED</span>
       <span className="toast-text">Achievement Unlocked: <strong>{toastMessage}</strong></span>
     </div>
   );

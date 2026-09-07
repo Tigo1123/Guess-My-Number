@@ -48,7 +48,7 @@ export function RoundSummary({
         <div className="summary-item">
           <span className="summary-label">RESULT:</span>
           <span className={`summary-value ${isWin ? 'win' : 'loss'}`}>
-            {isWin ? 'WIN 🎉' : 'LOSS 💀'}
+            {isWin ? 'WIN' : 'LOSS'}
           </span>
         </div>
         <div className="summary-item">
@@ -94,7 +94,7 @@ export function RoundSummary({
           <div className="summary-item full-width">
             <span className="summary-label">ACHIEVEMENTS UNLOCKED:</span>
             <span className="summary-value win">
-              🏆 {unlockedThisRound.join(', ')}
+              {unlockedThisRound.join(', ')}
             </span>
           </div>
         )}

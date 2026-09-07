@@ -3,11 +3,11 @@ import { ACHIEVEMENTS } from '../constants/achievements';
 
 export function ProfileSummary({
   activeProfile,
-  statistics,
-  streak,
-  bestAttempts,
-  achievements,
-  dailyStreak,
+  statistics = {},
+  streak = {},
+  bestAttempts = {},
+  achievements = [],
+  dailyStreak = {},
 }) {
   if (!activeProfile) return null;
 
@@ -19,48 +19,59 @@ export function ProfileSummary({
   const totalAchievements = ACHIEVEMENTS.length;
   const currentDailyStreak = dailyStreak.current || 0;
 
-  const easyBest = bestAttempts.easy !== null ? `${bestAttempts.easy}` : '-';
-  const mediumBest = bestAttempts.medium !== null ? `${bestAttempts.medium}` : '-';
-  const hardBest = bestAttempts.hard !== null ? `${bestAttempts.hard}` : '-';
+  const easyBest = bestAttempts.easy !== null && bestAttempts.easy !== undefined ? `${bestAttempts.easy}` : '—';
+  const mediumBest = bestAttempts.medium !== null && bestAttempts.medium !== undefined ? `${bestAttempts.medium}` : '—';
+  const hardBest = bestAttempts.hard !== null && bestAttempts.hard !== undefined ? `${bestAttempts.hard}` : '—';
 
   return (
-    <section className="profile-summary-container" aria-label="Player Profile Summary">
-      <div className="profile-summary-header">
-        <h2 className="profile-summary-title">PLAYER SUMMARY: {activeProfile.name}</h2>
-      </div>
+    <div className="player-summary-section">
+      <section className="summary-card-block" aria-label="Player Summary">
+        <h2 className="section-title">Player Summary ({activeProfile.name})</h2>
+        <div className="metrics-grid-6">
+          <div className="metric-box">
+            <span className="metric-box-label">Total Games</span>
+            <span className="metric-box-value">{totalGames}</span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Wins</span>
+            <span className="metric-box-value accent-green">{totalWins}</span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Win Rate</span>
+            <span className="metric-box-value">{winRate}%</span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Best Streak</span>
+            <span className="metric-box-value accent-orange">{bestWinStreak}</span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Achievements</span>
+            <span className="metric-box-value">{achievementsCount} / {totalAchievements}</span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Daily Streak</span>
+            <span className="metric-box-value accent-blue">{currentDailyStreak}</span>
+          </div>
+        </div>
+      </section>
 
-      <div className="profile-summary-grid">
-        <div className="summary-card">
-          <span className="card-label">TOTAL GAMES</span>
-          <span className="card-value">{totalGames}</span>
+      <section className="summary-card-block" aria-label="Best Attempts">
+        <h3 className="section-subtitle">Best Attempts</h3>
+        <div className="best-attempts-grid">
+          <div className="best-attempt-item">
+            <span className="best-attempt-label">Easy</span>
+            <span className="best-attempt-value">{easyBest}</span>
+          </div>
+          <div className="best-attempt-item">
+            <span className="best-attempt-label">Medium</span>
+            <span className="best-attempt-value">{mediumBest}</span>
+          </div>
+          <div className="best-attempt-item">
+            <span className="best-attempt-label">Hard</span>
+            <span className="best-attempt-value">{hardBest}</span>
+          </div>
         </div>
-        <div className="summary-card">
-          <span className="card-label">WINS</span>
-          <span className="card-value win">{totalWins}</span>
-        </div>
-        <div className="summary-card">
-          <span className="card-label">WIN RATE</span>
-          <span className="card-value">{winRate}%</span>
-        </div>
-        <div className="summary-card">
-          <span className="card-label">BEST STREAK</span>
-          <span className="card-value streak">🔥 {bestWinStreak}</span>
-        </div>
-        <div className="summary-card">
-          <span className="card-label">ACHIEVEMENTS</span>
-          <span className="card-value">🏆 {achievementsCount} / {totalAchievements}</span>
-        </div>
-        <div className="summary-card">
-          <span className="card-label">DAILY STREAK</span>
-          <span className="card-value daily">⭐ {currentDailyStreak}</span>
-        </div>
-        <div className="summary-card full-width">
-          <span className="card-label">BEST ATTEMPTS (EASY / MEDIUM / HARD)</span>
-          <span className="card-value attempts-trio">
-            Easy: <strong>{easyBest}</strong> | Medium: <strong>{mediumBest}</strong> | Hard: <strong>{hardBest}</strong>
-          </span>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
