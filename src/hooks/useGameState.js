@@ -7,6 +7,7 @@ import {
   getYesterdayDateKey,
 } from '../utils/dailyChallenge';
 import { useLocalStorage } from './useLocalStorage';
+import { usePlayerProfiles } from './usePlayerProfiles';
 
 function generateSecretNumber(maxNumber) {
   return Math.trunc(Math.random() * maxNumber) + 1;
@@ -167,6 +168,21 @@ export function sanitizeDailyChallengeHistory(raw) {
 }
 
 export function useGameState() {
+  const playerProfiles = usePlayerProfiles();
+  const {
+    profilesData,
+    profiles,
+    activeProfileId,
+    activeProfile,
+    createProfile,
+    switchProfile,
+    renameProfile,
+    deleteProfile,
+    updateActiveProgress,
+    triggerExport,
+    restoreBackup,
+  } = playerProfiles;
+
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY);
   const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed' | 'limited'
 
@@ -179,53 +195,81 @@ export function useGameState() {
   const [isDailyChallengeActive, setIsDailyChallengeActive] = useState(false);
   const [isPracticeReplay, setIsPracticeReplay] = useState(false);
 
-  // Persistent high scores
-  const [highScores, setHighScores] = useLocalStorage(
-    'guess_my_number_highscores',
-    { easy: 0, medium: 0, hard: 0 },
-    sanitizeHighScores
-  );
+  // Profile-scoped persistent progress getters
+  const activeProgress = activeProfile ? activeProfile.progress : {};
 
-  // Persistent lifetime statistics
-  const [statistics, setStatistics] = useLocalStorage(
-    'guess_my_number_statistics',
-    INITIAL_STATISTICS,
-    sanitizeStatistics
-  );
+  const highScores = useMemo(() => sanitizeHighScores(activeProgress.highScores), [activeProgress.highScores]);
+  const statistics = useMemo(() => sanitizeStatistics(activeProgress.statistics), [activeProgress.statistics]);
+  const streak = useMemo(() => sanitizeStreak(activeProgress.streak), [activeProgress.streak]);
+  const bestAttempts = useMemo(() => sanitizeBestAttempts(activeProgress.bestAttempts), [activeProgress.bestAttempts]);
+  const achievements = useMemo(() => sanitizeAchievements(activeProgress.achievements), [activeProgress.achievements]);
+  const dailyChallengeHistory = useMemo(() => sanitizeDailyChallengeHistory(activeProgress.dailyChallengeHistory), [activeProgress.dailyChallengeHistory]);
+  const dailyStreak = useMemo(() => sanitizeDailyStreak(activeProgress.dailyStreak), [activeProgress.dailyStreak]);
 
-  // Persistent win streak tracking
-  const [streak, setStreak] = useLocalStorage(
-    'guess_my_number_streak',
-    INITIAL_STREAK,
-    sanitizeStreak
-  );
+  // Profile-scoped progress setters
+  const setHighScores = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      highScores: typeof updater === 'function' ? updater(prev.highScores) : updater,
+    }));
+  }, [updateActiveProgress]);
 
-  // Persistent best attempts per difficulty
-  const [bestAttempts, setBestAttempts] = useLocalStorage(
-    'guess_my_number_best_attempts',
-    INITIAL_BEST_ATTEMPTS,
-    sanitizeBestAttempts
-  );
+  const setStatistics = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      statistics: typeof updater === 'function' ? updater(prev.statistics) : updater,
+    }));
+  }, [updateActiveProgress]);
 
-  // Persistent achievements
-  const [achievements, setAchievements] = useLocalStorage(
-    'guess_my_number_achievements',
-    [],
-    sanitizeAchievements
-  );
+  const setStreak = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      streak: typeof updater === 'function' ? updater(prev.streak) : updater,
+    }));
+  }, [updateActiveProgress]);
 
-  // Persistent Daily Challenge history & streak
-  const [dailyChallengeHistory, setDailyChallengeHistory] = useLocalStorage(
-    'guess_my_number_daily_challenge',
-    {},
-    sanitizeDailyChallengeHistory
-  );
+  const setBestAttempts = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      bestAttempts: typeof updater === 'function' ? updater(prev.bestAttempts) : updater,
+    }));
+  }, [updateActiveProgress]);
 
-  const [dailyStreak, setDailyStreak] = useLocalStorage(
-    'guess_my_number_daily_streak',
-    INITIAL_DAILY_STREAK,
-    sanitizeDailyStreak
-  );
+  const setAchievements = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      achievements: typeof updater === 'function' ? updater(prev.achievements) : updater,
+    }));
+  }, [updateActiveProgress]);
+
+  const setDailyChallengeHistory = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      dailyChallengeHistory: typeof updater === 'function' ? updater(prev.dailyChallengeHistory) : updater,
+    }));
+  }, [updateActiveProgress]);
+
+  const setDailyStreak = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      dailyStreak: typeof updater === 'function' ? updater(prev.dailyStreak) : updater,
+    }));
+  }, [updateActiveProgress]);
+
+  // Sync legacy localStorage keys for backward compatibility
+  useEffect(() => {
+    try {
+      localStorage.setItem('guess_my_number_highscores', JSON.stringify(highScores));
+      localStorage.setItem('guess_my_number_statistics', JSON.stringify(statistics));
+      localStorage.setItem('guess_my_number_streak', JSON.stringify(streak));
+      localStorage.setItem('guess_my_number_best_attempts', JSON.stringify(bestAttempts));
+      localStorage.setItem('guess_my_number_achievements', JSON.stringify(achievements));
+      localStorage.setItem('guess_my_number_daily_challenge', JSON.stringify(dailyChallengeHistory));
+      localStorage.setItem('guess_my_number_daily_streak', JSON.stringify(dailyStreak));
+    } catch {
+      // Ignore storage sync errors
+    }
+  }, [highScores, statistics, streak, bestAttempts, achievements, dailyChallengeHistory, dailyStreak]);
 
   const todayResult = dailyChallengeHistory[todayKey] || null;
   const isCompletedToday = Boolean(todayResult && todayResult.completed);
@@ -285,6 +329,17 @@ export function useGameState() {
     setToastMessage(null);
     setResetToken((prev) => prev + 1);
   }, [difficulty, gameMode]);
+
+  // Profile switch reset effect
+  const prevProfileIdRef = useRef(activeProfileId);
+  useEffect(() => {
+    if (prevProfileIdRef.current !== activeProfileId) {
+      prevProfileIdRef.current = activeProfileId;
+      setIsDailyChallengeActive(false);
+      setIsPracticeReplay(false);
+      resetGame(DEFAULT_DIFFICULTY, 'classic');
+    }
+  }, [activeProfileId, resetGame]);
 
   // Change Difficulty
   const changeDifficulty = useCallback((newLevel) => {
@@ -755,6 +810,15 @@ export function useGameState() {
     dailyStreak,
     isDailyChallengeActive,
     isPracticeReplay,
+    profiles,
+    activeProfileId,
+    activeProfile,
+    createProfile,
+    switchProfile,
+    renameProfile,
+    deleteProfile,
+    triggerExport,
+    restoreBackup,
     changeDifficulty,
     changeGameMode,
     makeGuess,

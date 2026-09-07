@@ -15,9 +15,12 @@ import { ScoreBoard } from './components/ScoreBoard';
 import { RoundSummary } from './components/RoundSummary';
 import { GuessHistory } from './components/GuessHistory';
 import { ActionControls } from './components/ActionControls';
-import { GameStatistics } from './components/GameStatistics';
 import { Achievements } from './components/Achievements';
 import { AchievementToast } from './components/AchievementToast';
+import { ProfileManager } from './components/ProfileManager';
+import { ProfileSummary } from './components/ProfileSummary';
+import { LocalLeaderboard } from './components/LocalLeaderboard';
+import { ProgressBackupControls } from './components/ProgressBackupControls';
 import { useGameState } from './hooks/useGameState';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
@@ -56,6 +59,15 @@ export function App() {
     dailyStreak,
     isDailyChallengeActive,
     isPracticeReplay,
+    profiles,
+    activeProfileId,
+    activeProfile,
+    createProfile,
+    switchProfile,
+    renameProfile,
+    deleteProfile,
+    triggerExport,
+    restoreBackup,
     changeDifficulty,
     changeGameMode,
     makeGuess,
@@ -131,6 +143,18 @@ export function App() {
           🔊 Sound: {soundEnabled ? 'ON' : 'OFF'}
         </button>
       </div>
+
+      <ProfileManager
+        profiles={profiles}
+        activeProfileId={activeProfileId}
+        activeProfile={activeProfile}
+        onCreateProfile={createProfile}
+        onSwitchProfile={switchProfile}
+        onRenameProfile={renameProfile}
+        onDeleteProfile={deleteProfile}
+      />
+
+      <div className="divider" />
 
       <DailyChallengePanel
         todayKey={todayKey}
@@ -250,6 +274,31 @@ export function App() {
         streak={streak}
         bestAttempts={bestAttempts}
         onResetStatistics={resetStatistics}
+      />
+
+      <div className="divider" />
+
+      <ProfileSummary
+        activeProfile={activeProfile}
+        statistics={statistics}
+        streak={streak}
+        bestAttempts={bestAttempts}
+        achievements={achievements}
+        dailyStreak={dailyStreak}
+      />
+
+      <div className="divider" />
+
+      <LocalLeaderboard
+        profiles={profiles}
+        activeProfileId={activeProfileId}
+      />
+
+      <div className="divider" />
+
+      <ProgressBackupControls
+        onExportBackup={() => triggerExport(soundEnabled)}
+        onRestoreBackup={restoreBackup}
       />
 
       <div className="divider" />
