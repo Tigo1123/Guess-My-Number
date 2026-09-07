@@ -15,7 +15,7 @@ export function GuessForm({
     if (!disabled && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [resetToken]); // Listens ONLY to resetToken, not every guess!
+  }, [resetToken, disabled]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,8 +25,8 @@ export function GuessForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="guess-form-wrapper" noValidate>
-      <div className="input-box">
+    <form onSubmit={handleSubmit} className="guess-form" noValidate>
+      <div className="input-row">
         <label htmlFor="guess-input" className="sr-only">
           Guess a number
         </label>
@@ -34,19 +34,18 @@ export function GuessForm({
           id="guess-input"
           ref={inputRef}
           type="number"
-          className={`guess ${isInvalid ? 'invalid' : ''}`}
-          placeholder="Type a number..."
+          className={`guess-input ${isInvalid ? 'invalid' : ''}`}
+          placeholder="Enter your guess..."
           value={guessInput}
           onChange={(e) => onGuessChange(e.target.value)}
           disabled={disabled}
           aria-invalid={isInvalid}
           autoComplete="off"
         />
+        <button type="submit" className="btn-check-guess btn-primary" disabled={disabled}>
+          Check
+        </button>
       </div>
-
-      <button type="submit" className="check" disabled={disabled}>
-        Check
-      </button>
     </form>
   );
 }

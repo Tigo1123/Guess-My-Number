@@ -14,6 +14,10 @@ export function ProfileManager({
   const [errorMessage, setErrorMessage] = useState('');
 
   const activeName = activeProfile ? activeProfile.name : 'Unknown';
+  const stats = (activeProfile && activeProfile.progress && activeProfile.progress.statistics) || {};
+  const games = stats.totalGames || 0;
+  const wins = stats.totalWins || 0;
+  const winRate = games > 0 ? Math.round((wins / games) * 100) : 0;
 
   const handleOpenCreate = () => {
     setInputName('');
@@ -80,46 +84,61 @@ export function ProfileManager({
   };
 
   return (
-    <section className="profile-manager-container" aria-label="Player Profiles Manager">
-      <div className="profile-manager-header">
-        <div className="profile-active-display">
-          <span className="profile-active-label">ACTIVE PLAYER:</span>
-          <strong className="profile-active-name">{activeName}</strong>
+    <section className="summary-card-block" aria-label="Player Profiles Manager">
+      <div className="section-header-row">
+        <h2 className="section-title">Player Profiles</h2>
+        <button
+          type="button"
+          className="btn-primary btn-sm"
+          onClick={activePanel === 'create' ? handleClose : handleOpenCreate}
+          aria-label="Create New Player Profile"
+        >
+          New Player
+        </button>
+      </div>
+
+      <div className="active-player-card">
+        <div className="player-card-header">
+          <div className="avatar-circle">
+            {activeName ? activeName.charAt(0).toUpperCase() : 'P'}
+          </div>
+          <div className="player-card-info">
+            <h3 className="player-card-name">{activeName}</h3>
+            <span className="player-card-badge">Active player</span>
+          </div>
         </div>
 
-        <div className="profile-action-buttons" role="group" aria-label="Profile Actions">
+        <div className="player-card-stats-row">
+          <span>Games: <strong>{games}</strong></span>
+          <span>Wins: <strong>{wins}</strong></span>
+          <span>Win Rate: <strong>{winRate}%</strong></span>
+        </div>
+
+        <div className="player-card-actions" role="group" aria-label="Profile Actions">
           <button
             type="button"
-            className={`btn-profile-action ${activePanel === 'switch' ? 'active' : ''}`}
+            className="btn-secondary"
             onClick={activePanel === 'switch' ? handleClose : handleOpenSwitch}
             aria-label="Switch Player Profile"
           >
-            👤 Switch Player
+            Switch
           </button>
           <button
             type="button"
-            className={`btn-profile-action ${activePanel === 'create' ? 'active' : ''}`}
-            onClick={activePanel === 'create' ? handleClose : handleOpenCreate}
-            aria-label="Create New Player Profile"
-          >
-            ➕ New Player
-          </button>
-          <button
-            type="button"
-            className={`btn-profile-action ${activePanel === 'rename' ? 'active' : ''}`}
+            className="btn-secondary"
             onClick={activePanel === 'rename' ? handleClose : handleOpenRename}
             aria-label="Rename Current Player Profile"
           >
-            ✏️ Rename
+            Rename
           </button>
           <button
             type="button"
-            className={`btn-profile-action danger ${activePanel === 'delete' ? 'active' : ''}`}
+            className="btn-danger"
             onClick={activePanel === 'delete' ? handleClose : handleOpenDelete}
             aria-label="Delete Current Player Profile"
             disabled={profiles.length <= 1}
           >
-            🗑️ Delete
+            Delete
           </button>
         </div>
       </div>
@@ -139,9 +158,13 @@ export function ProfileManager({
                     onClick={() => handleSelectSwitch(p.id)}
                     aria-label={`Select player ${p.name}${isActive ? ' (currently active)' : ''}`}
                   >
+                    <span className="avatar-circle">
+                      {p.name ? p.name.charAt(0).toUpperCase() : 'P'}
+                    </span>
                     <span className="profile-item-name">{p.name}</span>
                     {isActive && <span className="active-badge">(ACTIVE)</span>}
                   </button>
+
                 </li>
               );
             })}
@@ -153,32 +176,44 @@ export function ProfileManager({
       )}
 
       {activePanel === 'create' && (
-        <form className="profile-panel-box" onSubmit={handleCreateSubmit} aria-label="Create New Player Profile Form">
-          <h3 className="panel-title">CREATE NEW PLAYER</h3>
-          <div className="form-group">
-            <label htmlFor="new-player-name-input">Player Name:</label>
+        <form className="create-player-card" onSubmit={handleCreateSubmit} aria-label="Create New Player Profile Form">
+          <div className="create-player-header">
+            <div className="create-avatar-badge">+</div>
+            <div className="create-header-text">
+              <h3 className="create-title">Create New Player</h3>
+              <p className="create-subtitle">Add a new player profile with separate progress and statistics.</p>
+            </div>
+          </div>
+
+          <div className="form-group-field">
+            <label htmlFor="new-player-name-input" className="field-label">
+              Player name
+            </label>
             <input
               id="new-player-name-input"
               type="text"
-              className="terminal-input"
+              className={`create-player-input ${errorMessage ? 'has-error' : ''}`}
               maxLength={20}
               value={inputName}
               onChange={(e) => {
                 setInputName(e.target.value);
                 setErrorMessage('');
               }}
-              placeholder="Enter name (1-20 chars)"
+              placeholder="Enter name (1-20 characters)"
               autoFocus
             />
+            <span className="field-helper-text">
+              Enter a unique name (1 to 20 characters).
+            </span>
           </div>
 
           {errorMessage && (
-            <div className="profile-error-message" role="alert">
-              ⚠️ {errorMessage}
+            <div className="profile-error-message inline-error" role="alert">
+              {errorMessage}
             </div>
           )}
 
-          <div className="panel-form-actions">
+          <div className="create-actions-row">
             <button type="submit" className="btn-primary">
               Create Player
             </button>
@@ -211,7 +246,7 @@ export function ProfileManager({
 
           {errorMessage && (
             <div className="profile-error-message" role="alert">
-              ⚠️ {errorMessage}
+              {errorMessage}
             </div>
           )}
 
@@ -240,7 +275,7 @@ export function ProfileManager({
 
               {errorMessage && (
                 <div className="profile-error-message" role="alert">
-                  ⚠️ {errorMessage}
+                  {errorMessage}
                 </div>
               )}
 

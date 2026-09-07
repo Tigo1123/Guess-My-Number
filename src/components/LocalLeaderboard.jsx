@@ -49,9 +49,9 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
   }, [profiles, activeProfileId, filter]);
 
   return (
-    <section className="leaderboard-container" aria-label="Local Player Leaderboard">
-      <div className="leaderboard-header">
-        <h2 className="leaderboard-title">LOCAL LEADERBOARD</h2>
+    <section className="summary-card-block" aria-label="Local Player Leaderboard">
+      <div className="section-header-row">
+        <h2 className="section-title">Local Leaderboard</h2>
 
         <div className="leaderboard-filter-tabs" role="group" aria-label="Leaderboard Difficulty Filter">
           {['overall', 'easy', 'medium', 'hard'].map((f) => (
@@ -90,16 +90,17 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
                 className={entry.isActive ? 'active-profile-row' : ''}
                 aria-current={entry.isActive ? 'row' : undefined}
               >
-                <td className="rank-cell">#{index + 1}</td>
+                <td className="rank-cell">{index + 1}</td>
                 <td className="player-cell">
                   <span className="player-name">{entry.name}</span>
-                  {entry.isActive && <span className="active-badge" aria-label="Active Player">(ACTIVE)</span>}
+                  {entry.isActive && <span className="active-badge" aria-label="Active Player">(Active)</span>}
                 </td>
                 <td className="wins-cell">{entry.wins}</td>
                 <td className="winrate-cell">{entry.winRatePercent}%</td>
-                <td className="streak-cell">🔥 {entry.bestStreak}</td>
+                <td className="streak-cell">{entry.bestStreak}</td>
                 <td className="games-cell">{entry.games}</td>
-                <td className="achievements-cell">🏆 {entry.achievementCount}</td>
+                <td className="achievements-cell">{entry.achievementCount}</td>
+
               </tr>
             ))}
           </tbody>

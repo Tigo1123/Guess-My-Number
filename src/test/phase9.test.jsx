@@ -459,7 +459,7 @@ describe('Phase 9 — Daily Challenge & Limited Attempts Mode', () => {
         />
       );
 
-      expect(screen.getByText(/Today's Challenge Completed ✅/i)).toBeInTheDocument();
+      expect(screen.getByText(/Today's Challenge Completed/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Start Practice Replay/i })).toBeInTheDocument();
     });
   });

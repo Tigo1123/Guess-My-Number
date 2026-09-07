@@ -8,6 +8,8 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
   const [isConfirming, setIsConfirming] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [fileName, setFileName] = useState('');
+
   const handleExportClick = () => {
     setErrorMessage('');
     setSuccessMessage('');
@@ -20,6 +22,7 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
     setSuccessMessage('');
     setSelectedBackup(null);
     setIsConfirming(false);
+    setFileName(file ? file.name : '');
 
     if (!file) return;
 
@@ -30,6 +33,7 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
       if (!validation.valid) {
         setErrorMessage(validation.error);
         if (fileInputRef.current) fileInputRef.current.value = '';
+        setFileName('');
       } else {
         setSelectedBackup(validation.payload);
         setIsConfirming(true);
@@ -39,6 +43,7 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
     reader.onerror = () => {
       setErrorMessage('Failed to read backup file');
       if (fileInputRef.current) fileInputRef.current.value = '';
+      setFileName('');
     };
 
     reader.readAsText(file);
@@ -54,6 +59,7 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
       setSuccessMessage('Progress restored successfully!');
       setSelectedBackup(null);
       setIsConfirming(false);
+      setFileName('');
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -62,42 +68,45 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
     setSelectedBackup(null);
     setIsConfirming(false);
     setErrorMessage('');
+    setFileName('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
-    <section className="backup-controls-container" aria-label="Progress Backup and Restore">
-      <div className="backup-controls-header">
-        <h2 className="backup-title">PROGRESS BACKUP & RESTORE</h2>
-      </div>
+    <section className="summary-card-block" aria-label="Progress Backup and Restore">
+      <h2 className="section-title">Backup & Restore</h2>
+      <p className="section-subtitle">Keep a copy of your player profiles and progress.</p>
 
-      <div className="backup-actions-grid">
-        <div className="backup-action-box">
-          <span className="backup-box-title">EXPORT PROGRESS</span>
-          <p className="backup-box-desc">Download a backup file containing all player profiles, high scores, and statistics.</p>
+      <div className="backup-sections-grid">
+        <div className="backup-item-box">
+          <h3 className="backup-item-title">Export</h3>
+          <p className="backup-item-desc">Save all local game progress to a JSON backup.</p>
           <button
             type="button"
-            className="btn-backup export"
+            className="btn-secondary"
             onClick={handleExportClick}
             aria-label="Export Progress Backup JSON file"
           >
-            💾 Download Backup (.json)
+            Export backup
           </button>
         </div>
 
-        <div className="backup-action-box">
-          <span className="backup-box-title">RESTORE BACKUP</span>
-          <p className="backup-box-desc">Upload a previously saved .json backup file to restore player profiles.</p>
-          <div className="file-input-wrapper">
-            <label htmlFor="backup-file-input" className="btn-backup import-label">
-              📁 Choose Backup File
+        <div className="backup-item-box">
+          <h3 className="backup-item-title">Import</h3>
+          <p className="backup-item-desc">Restore profiles and progress from a previous backup.</p>
+          <div className="file-picker-row">
+            <label htmlFor="backup-file" className="btn-secondary">
+              Choose backup file
             </label>
+            <span className="file-status-text">
+              {fileName || 'No file selected'}
+            </span>
             <input
-              id="backup-file-input"
+              id="backup-file"
               ref={fileInputRef}
               type="file"
               accept=".json,application/json"
-              className="file-input-hidden"
+              className="visually-hidden-file-input"
               onChange={handleFileChange}
               aria-label="Upload Progress Backup JSON file"
             />
@@ -107,20 +116,20 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
 
       {errorMessage && (
         <div className="backup-message error" role="alert">
-          ⚠️ {errorMessage}
+          {errorMessage}
         </div>
       )}
 
       {successMessage && (
         <div className="backup-message success" role="status">
-          ✅ {successMessage}
+          {successMessage}
         </div>
       )}
 
       {isConfirming && selectedBackup && (
         <div className="backup-confirm-modal" aria-label="Restore Backup Confirmation">
           <div className="confirm-modal-box">
-            <h3 className="confirm-modal-title">RESTORE BACKUP CONFIRMATION</h3>
+            <h3 className="confirm-modal-title">Restore Backup Confirmation</h3>
             <p className="confirm-modal-text">
               Restore this backup? This will replace all current player profiles and progress.
             </p>
@@ -133,7 +142,7 @@ export function ProgressBackupControls({ onExportBackup, onRestoreBackup }) {
                 className="btn-danger-confirm"
                 onClick={handleConfirmRestore}
               >
-                Confirm Restore
+                Restore backup
               </button>
               <button
                 type="button"

@@ -32,22 +32,22 @@ export function DailyChallengePanel({
         </div>
         <div className="daily-info-item">
           <span>Daily Streak:</span>
-          <strong className="streak-highlight">{dailyStreak.current} 🔥 (Best: {dailyStreak.best})</strong>
+          <strong className="streak-highlight">{dailyStreak.current} (Best: {dailyStreak.best})</strong>
         </div>
       </div>
 
       {isCompletedToday && todayResult && (
         <div className="daily-status-box completed">
-          <span>Today's Challenge Completed ✅</span>
+          <span>Today's Challenge Completed</span>
           <div className="official-result-detail">
-            Official Result: <strong>{todayResult.won ? 'WIN 🎉' : 'LOSS 💀'}</strong> (Score: {todayResult.score}, Attempts: {todayResult.attempts})
+            Official Result: <strong>{todayResult.won ? 'WIN' : 'LOSS'}</strong> (Score: {todayResult.score}, Attempts: {todayResult.attempts})
           </div>
         </div>
       )}
 
       {isDailyChallengeActive && (
         <div className="daily-active-badge">
-          {isPracticeReplay ? '🎮 PRACTICE REPLAY ACTIVE' : '⭐ OFFICIAL DAILY CHALLENGE ACTIVE'}
+          {isPracticeReplay ? 'PRACTICE REPLAY ACTIVE' : 'OFFICIAL DAILY CHALLENGE ACTIVE'}
         </div>
       )}
 
@@ -60,7 +60,7 @@ export function DailyChallengePanel({
               onClick={onStartDailyChallenge}
               aria-label="Start Today's Daily Challenge"
             >
-              ⭐ Play Daily Challenge
+              Play Daily Challenge
             </button>
           ) : (
             <button
@@ -69,7 +69,7 @@ export function DailyChallengePanel({
               onClick={onStartPracticeReplay}
               aria-label="Start Practice Replay"
             >
-              🎮 Practice Replay
+              Practice Replay
             </button>
           )
         ) : (
@@ -79,7 +79,7 @@ export function DailyChallengePanel({
             onClick={onExitDailyChallenge}
             aria-label="Exit Daily Challenge"
           >
-            ↩ Exit Daily Challenge
+            Exit Daily Challenge
           </button>
         )}
       </div>

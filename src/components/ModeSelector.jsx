@@ -3,6 +3,7 @@ import React from 'react';
 export function ModeSelector({ activeMode, onSelectMode, disabled }) {
   return (
     <section className="mode-selector" aria-label="Select Game Mode">
+      <span className="selector-label">Game Mode</span>
       <div className="mode-buttons" role="group" aria-label="Game Modes">
         <button
           type="button"
