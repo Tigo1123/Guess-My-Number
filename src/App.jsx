@@ -21,6 +21,8 @@ import { ProfileManager } from './components/ProfileManager';
 import { ProfileSummary } from './components/ProfileSummary';
 import { LocalLeaderboard } from './components/LocalLeaderboard';
 import { ProgressBackupControls } from './components/ProgressBackupControls';
+import { PersonalRecords } from './components/PersonalRecords';
+import { GameHistory as CompletedGameHistory } from './components/GameHistory';
 import { useGameState } from './hooks/useGameState';
 import { useSoundEffects } from './hooks/useSoundEffects';
 
@@ -57,6 +59,8 @@ export function App() {
     isCompletedToday,
     todayResult,
     dailyStreak,
+    gameHistory,
+    clearGameHistory,
     isDailyChallengeActive,
     isPracticeReplay,
     profiles,
@@ -274,6 +278,25 @@ export function App() {
         streak={streak}
         bestAttempts={bestAttempts}
         onResetStatistics={resetStatistics}
+      />
+
+      <div className="divider" />
+
+      <PersonalRecords
+        statistics={statistics}
+        streak={streak}
+        bestAttempts={bestAttempts}
+        achievements={achievements}
+        dailyStreak={dailyStreak}
+        history={gameHistory}
+      />
+
+      <div className="divider" />
+
+      <CompletedGameHistory
+        history={gameHistory}
+        activeProfileName={activeProfile ? activeProfile.name : 'Active Player'}
+        onClearHistory={clearGameHistory}
       />
 
       <div className="divider" />
