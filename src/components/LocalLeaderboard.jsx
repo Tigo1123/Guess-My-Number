@@ -1,0 +1,109 @@
+import React, { useState, useMemo } from 'react';
+
+export function LocalLeaderboard({ profiles = [], activeProfileId }) {
+  const [filter, setFilter] = useState('overall'); // 'overall' | 'easy' | 'medium' | 'hard'
+
+  const leaderboardEntries = useMemo(() => {
+    return profiles.map((p) => {
+      const prog = p.progress || {};
+      const stats = prog.statistics || {};
+      const byDiff = stats.byDifficulty || {};
+      const streak = prog.streak || {};
+      const achievements = prog.achievements || [];
+
+      let games = 0;
+      let wins = 0;
+
+      if (filter === 'overall') {
+        games = stats.totalGames || 0;
+        wins = stats.totalWins || 0;
+      } else {
+        const diffData = byDiff[filter] || {};
+        games = diffData.games || 0;
+        wins = diffData.wins || 0;
+      }
+
+      const winRateRatio = games > 0 ? wins / games : 0;
+      const winRatePercent = Math.round(winRateRatio * 100);
+      const bestStreak = streak.bestStreak || 0;
+      const achievementCount = achievements.length;
+
+      return {
+        id: p.id,
+        name: p.name,
+        isActive: p.id === activeProfileId,
+        wins,
+        games,
+        winRateRatio,
+        winRatePercent,
+        bestStreak,
+        achievementCount,
+      };
+    }).sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.winRateRatio !== a.winRateRatio) return b.winRateRatio - a.winRateRatio;
+      if (b.bestStreak !== a.bestStreak) return b.bestStreak - a.bestStreak;
+      if (b.games !== a.games) return b.games - a.games;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
+  }, [profiles, activeProfileId, filter]);
+
+  return (
+    <section className="leaderboard-container" aria-label="Local Player Leaderboard">
+      <div className="leaderboard-header">
+        <h2 className="leaderboard-title">LOCAL LEADERBOARD</h2>
+
+        <div className="leaderboard-filter-tabs" role="group" aria-label="Leaderboard Difficulty Filter">
+          {['overall', 'easy', 'medium', 'hard'].map((f) => (
+            <button
+              key={f}
+              type="button"
+              className={`tab-btn ${filter === f ? 'active' : ''}`}
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
+            >
+              {f.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="leaderboard-table-wrapper">
+        <table className="leaderboard-table">
+          <caption>Local Player Rankings ({filter.toUpperCase()})</caption>
+          <thead>
+            <tr>
+              <th scope="col">RANK</th>
+              <th scope="col">PLAYER</th>
+              <th scope="col">WINS</th>
+              <th scope="col">WIN RATE</th>
+              <th scope="col">BEST STREAK</th>
+              <th scope="col">GAMES</th>
+              <th scope="col">ACHIEVEMENTS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboardEntries.map((entry, index) => (
+              <tr
+                key={entry.id}
+                className={entry.isActive ? 'active-profile-row' : ''}
+                aria-current={entry.isActive ? 'row' : undefined}
+              >
+                <td className="rank-cell">#{index + 1}</td>
+                <td className="player-cell">
+                  <span className="player-name">{entry.name}</span>
+                  {entry.isActive && <span className="active-badge" aria-label="Active Player">(ACTIVE)</span>}
+                </td>
+                <td className="wins-cell">{entry.wins}</td>
+                <td className="winrate-cell">{entry.winRatePercent}%</td>
+                <td className="streak-cell">🔥 {entry.bestStreak}</td>
+                <td className="games-cell">{entry.games}</td>
+                <td className="achievements-cell">🏆 {entry.achievementCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
