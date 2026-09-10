@@ -7,6 +7,7 @@ export function PersonalRecords({
   achievements = [],
   dailyStreak = {},
   history = [],
+  bestEndlessStreak = 0,
 }) {
   const analytics = useMemo(() => {
     const totalGames = statistics.totalGames || 0;
@@ -85,6 +86,10 @@ export function PersonalRecords({
             <span className="metric-box-value accent-green">
               {analytics.highestScoreWin !== null ? analytics.highestScoreWin : '—'}
             </span>
+          </div>
+          <div className="metric-box">
+            <span className="metric-box-label">Best Endless Streak</span>
+            <span className="metric-box-value accent-orange">{bestEndlessStreak}</span>
           </div>
           <div className="metric-box">
             <span className="metric-box-label">Fastest Timed Win</span>

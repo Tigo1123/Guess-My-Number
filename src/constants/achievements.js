@@ -43,6 +43,9 @@ export const ACHIEVEMENTS = [
   { id: 'CHALLENGER', title: 'Challenger', description: 'Complete a Friend Challenge.' },
   { id: 'DIFFICULTY_MASTER', title: 'Difficulty Master', description: 'Win at least one game in Easy, Medium, and Hard.' },
   { id: 'MODE_MASTER', title: 'Mode Master', description: 'Win a Classic, Timed, Limited, Daily, and Friend Challenge game.' },
+  { id: 'ENDLESS_STARTER', title: 'Getting Started', description: 'Win 3 consecutive Endless rounds.' },
+  { id: 'ENDLESS_UNSTOPPABLE', title: 'Unstoppable', description: 'Win 5 consecutive Endless rounds.' },
+  { id: 'ENDLESS_MASTER', title: 'Endless Master', description: 'Win 10 consecutive Endless rounds.' },
   {
     id: 'DAILY_DEBUT',
     title: 'Daily Debut',

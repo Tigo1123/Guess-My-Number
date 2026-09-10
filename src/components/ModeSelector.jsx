@@ -32,6 +32,15 @@ export function ModeSelector({ activeMode, onSelectMode, disabled }) {
         >
           Limited Attempts
         </button>
+        <button
+          type="button"
+          className={`mode-btn ${activeMode === 'endless' ? 'active' : ''}`}
+          aria-pressed={activeMode === 'endless'}
+          onClick={() => onSelectMode('endless')}
+          disabled={disabled}
+        >
+          ♾️ Endless
+        </button>
       </div>
     </section>
   );

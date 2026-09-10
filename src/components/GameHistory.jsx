@@ -13,6 +13,7 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
     if (filter === 'loss') return sorted.filter((h) => h.result === 'LOSS');
     if (['easy', 'medium', 'hard'].includes(filter)) return sorted.filter((h) => h.difficulty === filter);
     if (['classic', 'timed', 'limited'].includes(filter)) return sorted.filter((h) => h.mode === filter && !h.isFriendChallenge);
+    if (filter === 'endless') return sorted.filter((h) => h.mode === 'endless');
     if (filter === 'friend') return sorted.filter((h) => h.isFriendChallenge);
     if (filter === 'daily') return sorted.filter((h) => h.isDailyChallenge);
     return sorted;
@@ -60,6 +61,7 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
           { key: 'limited', label: 'Limited' },
           { key: 'daily', label: 'Daily' },
           { key: 'friend', label: 'Friend Challenge' },
+          { key: 'endless', label: 'Endless' },
         ].map((item) => (
           <button
             key={item.key}

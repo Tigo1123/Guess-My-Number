@@ -1,8 +1,8 @@
-const MODE_LABELS = { classic: 'Classic', timed: 'Timed Challenge', limited: 'Limited Attempts' };
+const MODE_LABELS = { classic: 'Classic', timed: 'Timed Challenge', limited: 'Limited Attempts', endless: 'Endless Streak' };
 
 // Explicitly select public result fields; never serialize the round or profile.
 export function generateShareText({ status, difficultyName, gameMode, attempts, score, streak,
-  isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge }) {
+  isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge, endlessRoundsWon, endlessBestStreak, endlessTotalGuesses }) {
   if (status !== 'WON' && status !== 'LOST') return '';
   const lines = ['Guess My Number 🎯'];
   if (isFriendChallenge) lines.push('Friend Challenge');
@@ -19,6 +19,11 @@ export function generateShareText({ status, difficultyName, gameMode, attempts, 
     ? difficultyName
     : [difficultyName, MODE_LABELS[gameMode]].filter(Boolean).join(' • ');
   if (description) lines.push(description);
+  if (gameMode === 'endless' && Number.isFinite(endlessRoundsWon)) {
+    lines.push(`Rounds Won: ${endlessRoundsWon}`);
+    if (Number.isFinite(endlessBestStreak)) lines.push(`Best Streak: ${endlessBestStreak}`);
+    if (Number.isFinite(endlessTotalGuesses)) lines.push(`Total Guesses: ${endlessTotalGuesses}`);
+  }
   const hasAttempts = Number.isFinite(attempts);
   if (status === 'WON') {
     lines.push(hasAttempts ? `Won in ${attempts} ${attempts === 1 ? 'attempt' : 'attempts'}` : 'Won');

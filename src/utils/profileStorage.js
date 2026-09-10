@@ -55,6 +55,10 @@ function sanitizeNonNegativeInt(val) {
   return 0;
 }
 
+function sanitizeBestEndlessStreak(val) {
+  return sanitizeNonNegativeInt(val);
+}
+
 export function sanitizeGameHistory(raw) {
   if (!Array.isArray(raw)) {
     return [];
@@ -69,7 +73,7 @@ export function sanitizeGameHistory(raw) {
     const playedAt = typeof entry.playedAt === 'string' && entry.playedAt ? entry.playedAt : new Date().toISOString();
     const result = entry.result === 'WIN' ? 'WIN' : 'LOSS';
     const difficulty = ['easy', 'medium', 'hard'].includes(entry.difficulty) ? entry.difficulty : 'easy';
-    const mode = ['classic', 'timed', 'limited'].includes(entry.mode) ? entry.mode : 'classic';
+    const mode = ['classic', 'timed', 'limited', 'endless'].includes(entry.mode) ? entry.mode : 'classic';
     const score = sanitizeNonNegativeInt(entry.score);
     const attempts = sanitizeNonNegativeInt(entry.attempts);
     const hintsUsed = sanitizeNonNegativeInt(entry.hintsUsed);
@@ -106,6 +110,9 @@ export function sanitizeGameHistory(raw) {
       dailyChallengeType,
       dailyDateKey,
       achievementsUnlocked,
+      endlessRunId: typeof entry.endlessRunId === 'string' && entry.endlessRunId.trim() ? entry.endlessRunId.trim() : null,
+      endlessRound: sanitizeNonNegativeInt(entry.endlessRound),
+      endlessStreak: sanitizeNonNegativeInt(entry.endlessStreak),
     });
   }
 
@@ -123,6 +130,7 @@ export function createEmptyProgress() {
     dailyChallengeHistory: {},
     dailyStreak: { ...INITIAL_DAILY_STREAK },
     gameHistory: [],
+    bestEndlessStreak: 0,
   };
 }
 
@@ -140,6 +148,7 @@ export function sanitizeProgress(raw) {
     dailyChallengeHistory: sanitizeDailyChallengeHistory(raw.dailyChallengeHistory),
     dailyStreak: sanitizeDailyStreak(raw.dailyStreak),
     gameHistory: sanitizeGameHistory(raw.gameHistory),
+    bestEndlessStreak: sanitizeBestEndlessStreak(raw.bestEndlessStreak),
   };
 }
 

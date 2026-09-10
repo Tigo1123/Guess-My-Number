@@ -112,6 +112,10 @@ export function App() {
     exitDailyChallenge,
     startFriendChallenge,
     exitFriendChallenge,
+    endlessRun,
+    bestEndlessStreak,
+    advanceEndlessRound,
+    restartGame,
   } = useGameState();
 
   const {
@@ -126,6 +130,7 @@ export function App() {
   } = useSoundEffects();
 
   const isGameOver = status !== 'PLAYING';
+  const endlessMaxAttempts = difficulty === 'easy' ? 6 : difficulty === 'medium' ? 7 : 8;
 
   const missionStateRef = useRef({ profileId: activeProfileId, initialized: false, completed: new Set() });
   useEffect(() => {
@@ -215,7 +220,7 @@ export function App() {
 
   useKeyboardShortcuts({
     onSubmitGuess: () => { if (!isGameOver && guessInput.trim()) handleGuessSubmit(guessInput); },
-    onNewRound: () => resetGame(),
+    onNewRound: () => restartGame(),
     onHint: () => { if (!isGameOver && canAffordHint) handleGetHint(); },
     onNavigate: (key) => setActiveTab({ 1: 'PLAY', 2: 'STATS', 3: 'HISTORY', 4: 'PLAYERS', 5: 'SETTINGS' }[key]),
     onOpenHelp: () => setShortcutsOpen(true),
@@ -338,13 +343,13 @@ export function App() {
             <DifficultySelector
               activeDifficulty={difficulty}
               onSelectDifficulty={changeDifficulty}
-              disabled={isDailyChallengeActive || isFriendChallengeActive}
+              disabled={isDailyChallengeActive || isFriendChallengeActive || endlessRun.active}
             />
 
             <ModeSelector
               activeMode={gameMode}
               onSelectMode={changeGameMode}
-              disabled={isDailyChallengeActive || isFriendChallengeActive}
+              disabled={isDailyChallengeActive || isFriendChallengeActive || endlessRun.active}
             />
 
             <div className="game-actions-bar">
@@ -357,7 +362,7 @@ export function App() {
                 canAffordHint={canAffordHint}
               />
               <ActionControls
-                onResetGame={resetGame}
+                onResetGame={restartGame}
               />
               <ChallengeCreator difficulty={difficulty} />
             </div>
@@ -373,10 +378,13 @@ export function App() {
               timeRemaining={timeRemaining}
               hintsUsed={hintsUsed}
               unlockedThisRound={unlockedThisRound}
-              maxAttempts={config.maxAttempts}
+              maxAttempts={gameMode === 'endless' ? endlessMaxAttempts : config.maxAttempts}
               isDailyChallengeActive={isDailyChallengeActive}
               isPracticeReplay={isPracticeReplay}
               isFriendChallengeActive={isFriendChallengeActive}
+              endlessRun={endlessRun}
+              bestEndlessStreak={bestEndlessStreak}
+              onNextEndlessRound={advanceEndlessRound}
               todayKey={todayKey}
             />
 
@@ -417,9 +425,11 @@ export function App() {
               />
               <AttemptsRemainingDisplay
                 attempts={attempts}
-                maxAttempts={config.maxAttempts}
+                maxAttempts={gameMode === 'endless' ? endlessMaxAttempts : config.maxAttempts}
                 isLimitedMode={gameMode === 'limited'}
+                isEndlessMode={gameMode === 'endless'}
               />
+              {gameMode === 'endless' && <div className="endless-round-indicator metric-card" aria-label="Endless Streak Status"><span className="metric-label">Endless Round</span><span className="metric-value">Round {endlessRun.currentRound} · Streak {endlessRun.roundsWon}</span></div>}
             </div>
           </div>
         </div>
@@ -460,6 +470,7 @@ export function App() {
           achievements={achievements}
           dailyStreak={dailyStreak}
           history={gameHistory}
+          bestEndlessStreak={bestEndlessStreak}
         />
 
         <Achievements

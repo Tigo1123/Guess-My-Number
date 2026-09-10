@@ -1,7 +1,7 @@
 import React from 'react';
 
-export function AttemptsRemainingDisplay({ attempts, maxAttempts, isLimitedMode }) {
-  if (!isLimitedMode) return null;
+export function AttemptsRemainingDisplay({ attempts, maxAttempts, isLimitedMode, isEndlessMode }) {
+  if (!isLimitedMode && !isEndlessMode) return null;
 
   const remaining = Math.max(0, maxAttempts - attempts);
 

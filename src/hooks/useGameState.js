@@ -112,6 +112,10 @@ export function sanitizeBestAttempts(raw) {
   };
 }
 
+export function sanitizeBestEndlessStreak(raw) {
+  return typeof raw === 'number' && Number.isFinite(raw) && Number.isInteger(raw) && raw >= 0 ? raw : 0;
+}
+
 export function sanitizeAchievements(raw) {
   if (!Array.isArray(raw)) {
     return [];
@@ -180,7 +184,8 @@ export function useGameState() {
   } = playerProfiles;
 
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY);
-  const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed' | 'limited'
+  const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'timed' | 'limited' | 'endless'
+  const [endlessRun, setEndlessRun] = useState({ active: false, runId: null, roundsWon: 0, currentRound: 1, totalGuesses: 0, newBest: false });
 
   const config = DIFFICULTIES[difficulty];
 
@@ -200,6 +205,7 @@ export function useGameState() {
   const statistics = useMemo(() => sanitizeStatistics(activeProgress.statistics), [activeProgress.statistics]);
   const streak = useMemo(() => sanitizeStreak(activeProgress.streak), [activeProgress.streak]);
   const bestAttempts = useMemo(() => sanitizeBestAttempts(activeProgress.bestAttempts), [activeProgress.bestAttempts]);
+  const bestEndlessStreak = useMemo(() => sanitizeBestEndlessStreak(activeProgress.bestEndlessStreak), [activeProgress.bestEndlessStreak]);
   const achievements = useMemo(() => sanitizeAchievements(activeProgress.achievements), [activeProgress.achievements]);
   const dailyChallengeHistory = useMemo(() => sanitizeDailyChallengeHistory(activeProgress.dailyChallengeHistory), [activeProgress.dailyChallengeHistory]);
   const dailyStreak = useMemo(() => sanitizeDailyStreak(activeProgress.dailyStreak), [activeProgress.dailyStreak]);
@@ -231,6 +237,13 @@ export function useGameState() {
     updateActiveProgress((prev) => ({
       ...prev,
       bestAttempts: typeof updater === 'function' ? updater(prev.bestAttempts) : updater,
+    }));
+  }, [updateActiveProgress]);
+
+  const setBestEndlessStreak = useCallback((updater) => {
+    updateActiveProgress((prev) => ({
+      ...prev,
+      bestEndlessStreak: typeof updater === 'function' ? updater(sanitizeBestEndlessStreak(prev.bestEndlessStreak)) : updater,
     }));
   }, [updateActiveProgress]);
 
@@ -305,7 +318,7 @@ export function useGameState() {
 
   // Hint Cost per difficulty
   const hintCost = difficulty === 'hard' ? 1 : 2;
-  const canAffordHint = score - hintCost >= 1;
+  const canAffordHint = score - hintCost >= 1 && !(gameMode === 'endless' && hintsUsed >= 1);
 
   // Active difficulty high score
   const currentHighScore = highScores[difficulty] || 0;
@@ -343,6 +356,8 @@ export function useGameState() {
     setResetToken((prev) => prev + 1);
   }, [difficulty, friendChallengeSeed, gameMode, isFriendChallengeActive]);
 
+  const createEndlessRun = useCallback(() => ({ active: true, runId: generateUUID(), roundsWon: 0, currentRound: 1, totalGuesses: 0, newBest: false }), []);
+
   // Profile switch reset effect
   const prevProfileIdRef = useRef(activeProfileId);
   useEffect(() => {
@@ -352,6 +367,7 @@ export function useGameState() {
       setIsPracticeReplay(false);
       setIsFriendChallengeActive(false);
       setFriendChallengeSeed(null);
+      setEndlessRun({ active: false, runId: null, roundsWon: 0, currentRound: 1, totalGuesses: 0, newBest: false });
       resetGame(DEFAULT_DIFFICULTY, 'classic');
     }
   }, [activeProfileId, resetGame]);
@@ -366,9 +382,24 @@ export function useGameState() {
   // Change Game Mode
   const changeGameMode = useCallback((newMode) => {
     if (newMode !== gameMode && !isDailyChallengeActive && !isFriendChallengeActive) {
+      if (newMode === 'endless') setEndlessRun(createEndlessRun());
+      else setEndlessRun({ active: false, runId: null, roundsWon: 0, currentRound: 1, totalGuesses: 0, newBest: false });
       resetGame(difficulty, newMode);
     }
-  }, [difficulty, gameMode, isDailyChallengeActive, isFriendChallengeActive, resetGame]);
+  }, [createEndlessRun, difficulty, gameMode, isDailyChallengeActive, isFriendChallengeActive, resetGame]);
+
+  const restartGame = useCallback(() => {
+    if (gameMode === 'endless') {
+      setEndlessRun(createEndlessRun());
+      resetGame(difficulty, 'endless');
+    } else resetGame();
+  }, [createEndlessRun, difficulty, gameMode, resetGame]);
+
+  const advanceEndlessRound = useCallback(() => {
+    if (gameMode !== 'endless' || !endlessRun.active || status !== 'WON') return;
+    setEndlessRun((prev) => ({ ...prev, currentRound: prev.currentRound + 1 }));
+    resetGame(difficulty, 'endless');
+  }, [difficulty, endlessRun.active, gameMode, resetGame, status]);
 
   // Start Daily Challenge (Official or Practice Replay)
   const startDailyChallenge = useCallback(() => {
@@ -431,6 +462,7 @@ export function useGameState() {
       nextDailyStreakCount,
       isFriendChallenge,
       completedHistory = [],
+      endlessRoundsWon = 0,
     } = context;
 
     const currentUnlocked = new Set(achievements);
@@ -448,7 +480,10 @@ export function useGameState() {
       }
     };
 
-    if (isFriendChallenge) tryUnlock('CHALLENGER');
+      if (isFriendChallenge) tryUnlock('CHALLENGER');
+      if (mode === 'endless' && endlessRoundsWon >= 3) tryUnlock('ENDLESS_STARTER');
+      if (mode === 'endless' && endlessRoundsWon >= 5) tryUnlock('ENDLESS_UNSTOPPABLE');
+      if (mode === 'endless' && endlessRoundsWon >= 10) tryUnlock('ENDLESS_MASTER');
 
     if (isWin) {
       if (totalWinsCount >= 1) tryUnlock('FIRST_WIN');
@@ -503,6 +538,9 @@ export function useGameState() {
       attemptsRemaining: entryData.attemptsRemaining ?? (gameMode === 'limited' ? Math.max(0, DIFFICULTIES[difficulty].maxAttempts - (entryData.attempts ?? attempts)) : null),
       isDailyChallenge: Boolean(isDailyChallengeActive),
       isFriendChallenge: Boolean(entryData.isFriendChallenge ?? isFriendChallengeActive),
+      endlessRunId: entryData.endlessRunId ?? null,
+      endlessRound: entryData.endlessRound ?? 0,
+      endlessStreak: entryData.endlessStreak ?? 0,
       dailyChallengeType: isDailyChallengeActive ? (isPracticeReplay ? 'practice' : 'official') : null,
       dailyDateKey: isDailyChallengeActive ? todayKey : null,
       achievementsUnlocked: entryData.achievementsUnlocked || [],
@@ -640,6 +678,7 @@ export function useGameState() {
   // Get Hint Callback
   const getHint = useCallback(() => {
     if (status !== 'PLAYING') return;
+    if (gameMode === 'endless' && hintsUsed >= 1) return;
     if (score - hintCost < 1) return;
 
     setScore((prev) => prev - hintCost);
@@ -682,7 +721,7 @@ export function useGameState() {
 
     setLastHintCategory(nextCategory);
     setCurrentHint(hintText);
-  }, [config.maxNumber, currentHint, hintCost, lastHintCategory, score, secretNumber, status]);
+  }, [config.maxNumber, currentHint, gameMode, hintCost, hintsUsed, lastHintCategory, score, secretNumber, status]);
 
   // Make Guess
   const makeGuess = useCallback((rawGuess) => {
@@ -747,6 +786,7 @@ export function useGameState() {
       });
 
       const nextDailyStreakCount = handleOfficialDailyCompletion(true, newAttempts, score);
+      const nextEndlessRoundsWon = gameMode === 'endless' && endlessRun.active ? endlessRun.roundsWon + 1 : 0;
 
       // Update statistics & check achievements exactly once for winning game end
       setStatistics((prev) => {
@@ -767,6 +807,7 @@ export function useGameState() {
           isOfficialDaily,
           isFriendChallenge: isFriendChallengeActive,
           completedHistory: gameHistory,
+          endlessRoundsWon: nextEndlessRoundsWon,
           nextDailyStreakCount: nextDailyStreakCount || 0,
         });
 
@@ -779,7 +820,11 @@ export function useGameState() {
           secretNumber,
           validGuesses: winGuesses,
           timeRemaining: gameMode === 'timed' ? Math.max(0, timeRemaining) : null,
-          attemptsRemaining: gameMode === 'limited' ? Math.max(0, config.maxAttempts - newAttempts) : null,
+          attemptsRemaining: gameMode === 'limited' ? Math.max(0, config.maxAttempts - newAttempts) : gameMode === 'endless' ? Math.max(0, (difficulty === 'easy' ? 6 : difficulty === 'medium' ? 7 : 8) - newAttempts) : null,
+          maxAttempts: gameMode === 'endless' ? (difficulty === 'easy' ? 6 : difficulty === 'medium' ? 7 : 8) : null,
+          endlessRunId: gameMode === 'endless' ? endlessRun.runId : null,
+          endlessRound: gameMode === 'endless' ? endlessRun.currentRound : 0,
+          endlessStreak: nextEndlessRoundsWon,
           achievementsUnlocked: unlockedIds || [],
         });
 
@@ -798,6 +843,10 @@ export function useGameState() {
           },
         };
       });
+      if (gameMode === 'endless' && endlessRun.active) {
+        setEndlessRun((prev) => ({ ...prev, roundsWon: nextEndlessRoundsWon, totalGuesses: prev.totalGuesses + newAttempts, newBest: prev.newBest || nextEndlessRoundsWon > bestEndlessStreak }));
+        setBestEndlessStreak((prev) => Math.max(prev, nextEndlessRoundsWon));
+      }
       return;
     }
 
@@ -808,7 +857,8 @@ export function useGameState() {
     setGuessHistory((prev) => [...prev, { guess: num, result: resultLabel }]);
 
     const newScore = score - 1;
-    const isLimitedAttemptsExhausted = gameMode === 'limited' && newAttempts >= config.maxAttempts;
+    const endlessMaxAttempts = difficulty === 'easy' ? 6 : difficulty === 'medium' ? 7 : 8;
+    const isLimitedAttemptsExhausted = (gameMode === 'limited' && newAttempts >= config.maxAttempts) || (gameMode === 'endless' && newAttempts >= endlessMaxAttempts);
     const isLoss = newScore <= 0 || isLimitedAttemptsExhausted;
 
     if (isLoss) {
@@ -860,6 +910,10 @@ export function useGameState() {
           validGuesses: lossGuesses,
           timeRemaining: gameMode === 'timed' ? Math.max(0, timeRemaining) : null,
           attemptsRemaining: gameMode === 'limited' ? 0 : null,
+          maxAttempts: gameMode === 'endless' ? endlessMaxAttempts : null,
+          endlessRunId: gameMode === 'endless' ? endlessRun.runId : null,
+          endlessRound: gameMode === 'endless' ? endlessRun.currentRound : 0,
+          endlessStreak: gameMode === 'endless' ? endlessRun.roundsWon : 0,
           achievementsUnlocked: unlockedIds || [],
         });
 
@@ -878,6 +932,11 @@ export function useGameState() {
           },
         };
       });
+      if (gameMode === 'endless' && endlessRun.active) {
+        const completedRounds = endlessRun.roundsWon;
+        setEndlessRun((prev) => ({ ...prev, active: false, totalGuesses: prev.totalGuesses + newAttempts, newBest: prev.newBest || completedRounds > bestEndlessStreak }));
+        setBestEndlessStreak((prev) => Math.max(prev, completedRounds));
+      }
     } else {
       setScore(newScore);
       setMessage(num > secretNumber ? '📉 Too High' : '📈 Too Low');
@@ -888,7 +947,7 @@ export function useGameState() {
         totalValidGuesses: prev.totalValidGuesses + 1,
       }));
     }
-  }, [attempts, config.maxAttempts, config.maxNumber, difficulty, evaluateAchievements, gameHistory, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isFriendChallengeActive, isPracticeReplay, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
+  }, [attempts, config.maxAttempts, config.maxNumber, difficulty, endlessRun, evaluateAchievements, gameHistory, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isFriendChallengeActive, isPracticeReplay, score, secretNumber, setBestAttempts, setBestEndlessStreak, setHighScores, setStatistics, setStreak, status, timeRemaining]);
 
   return {
     difficulty,
@@ -948,5 +1007,9 @@ export function useGameState() {
     exitDailyChallenge,
     startFriendChallenge,
     exitFriendChallenge,
+    endlessRun,
+    bestEndlessStreak,
+    advanceEndlessRound,
+    restartGame,
   };
 }

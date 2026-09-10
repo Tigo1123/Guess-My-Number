@@ -1,5 +1,5 @@
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
-const MODES = ['classic', 'timed', 'limited', 'daily', 'friend'];
+const MODES = ['classic', 'timed', 'limited', 'daily', 'friend', 'endless'];
 
 const finiteNonNegative = (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const isWin = (game) => game?.result === 'WIN' || game?.result === 'WON' || game?.won === true;
@@ -81,6 +81,9 @@ export function calculatePlayerAnalytics(history = []) {
     winRate: games.length ? Math.round((wins / games.length) * 100) : null,
     recentWinRate: recent.length ? Math.round((recentWins / recent.length) * 100) : null,
     currentStreak, bestStreak, difficultyStats, modeStats, recent,
+    endlessRuns: new Set(games.filter((game) => game.mode === 'endless' && game.endlessRunId).map((game) => game.endlessRunId)).size,
+    endlessRoundsWon: games.filter((game) => game.mode === 'endless' && game.result === 'WIN').length,
+    bestEndlessStreak: games.reduce((best, game) => game.mode === 'endless' ? Math.max(best, game.endlessStreak || 0) : best, 0),
   };
   // Descriptive aliases keep the utility convenient for other Stats consumers.
   analytics.last10WinRate = analytics.recentWinRate;
@@ -101,5 +104,5 @@ export function generatePlayerInsight(analytics) {
 
 export const analyticsLabels = {
   difficulty: { easy: 'Easy', medium: 'Medium', hard: 'Hard' },
-  mode: { classic: 'Classic', timed: 'Timed', limited: 'Limited', daily: 'Daily', friend: 'Friend Challenge' },
+  mode: { classic: 'Classic', timed: 'Timed', limited: 'Limited', daily: 'Daily', friend: 'Friend Challenge', endless: 'Endless' },
 };

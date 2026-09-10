@@ -18,16 +18,23 @@ export function RoundSummary({
   todayKey,
   streak,
   isFriendChallengeActive,
+  endlessRun,
+  bestEndlessStreak = 0,
+  onNextEndlessRound,
 }) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
   const isWin = status === 'WON';
   const shareText = generateShareText({ status, difficultyName, gameMode, score, attempts,
-    streak, isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge: isFriendChallengeActive });
+    streak, isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge: isFriendChallengeActive,
+    endlessRoundsWon: endlessRun?.roundsWon, endlessBestStreak: bestEndlessStreak, endlessTotalGuesses: endlessRun?.totalGuesses });
   const isTimedMode = gameMode === 'timed';
   const isLimitedMode = gameMode === 'limited';
 
-  const modeLabel = isLimitedMode
+  const isEndlessMode = gameMode === 'endless';
+  const modeLabel = isEndlessMode
+    ? 'ENDLESS STREAK'
+    : isLimitedMode
     ? 'LIMITED ATTEMPTS'
     : isTimedMode
     ? 'TIMED CHALLENGE'
@@ -36,7 +43,7 @@ export function RoundSummary({
   return (
     <section className="round-summary" aria-label="Round Summary">
       <h2 className="summary-title">
-        ROUND SUMMARY: {isWin ? 'VICTORY' : 'GAME OVER'}
+        {isEndlessMode && !isWin ? '♾️ ENDLESS RUN COMPLETE' : `ROUND SUMMARY: ${isWin ? 'VICTORY' : 'GAME OVER'}`}
       </h2>
       <div className="summary-grid">
         {isFriendChallengeActive && <div className="summary-item full-width highlight"><span className="summary-label">CHALLENGE:</span><span className="summary-value">FRIEND CHALLENGE</span></div>}
@@ -52,6 +59,12 @@ export function RoundSummary({
           <span className="summary-label">GAME MODE:</span>
           <span className="summary-value">{modeLabel}</span>
         </div>
+        {isEndlessMode && <>
+          <div className="summary-item"><span className="summary-label">ROUNDS WON:</span><span className="summary-value">{endlessRun?.roundsWon || 0}</span></div>
+          <div className="summary-item"><span className="summary-label">ROUNDS PLAYED:</span><span className="summary-value">{(endlessRun?.roundsWon || 0) + (isWin ? 0 : 1)}</span></div>
+          <div className="summary-item"><span className="summary-label">TOTAL GUESSES:</span><span className="summary-value">{endlessRun?.totalGuesses || 0}</span></div>
+          <div className="summary-item"><span className="summary-label">BEST ENDLESS STREAK:</span><span className="summary-value">{bestEndlessStreak}</span></div>
+        </>}
         <div className="summary-item">
           <span className="summary-label">RESULT:</span>
           <span className={`summary-value ${isWin ? 'win' : 'loss'}`}>
@@ -106,6 +119,8 @@ export function RoundSummary({
           </div>
         )}
       </div>
+      {isEndlessMode && isWin && endlessRun?.active && <button type="button" className="btn-primary endless-next-round" onClick={onNextEndlessRound}>Next Endless Round</button>}
+      {isEndlessMode && !isWin && endlessRun?.newBest && endlessRun.roundsWon > 0 && <p className="endless-new-best" role="status">🏆 NEW BEST!</p>}
       <ShareResultControls key={shareText} text={shareText} />
     </section>
   );
