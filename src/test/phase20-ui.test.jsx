@@ -17,7 +17,7 @@ describe('Phase 20 engagement UI', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('tab', { name: 'Stats' }));
     expect(screen.getByRole('region', { name: "Today's Missions" })).toBeInTheDocument();
-    expect(screen.getAllByRole('progressbar')).toHaveLength(3);
+    expect(screen.getByRole('region', { name: "Today's Missions" }).querySelectorAll('progress')).toHaveLength(3);
     expect(screen.getByRole('region', { name: 'Game Achievements' })).toBeInTheDocument();
   });
 });

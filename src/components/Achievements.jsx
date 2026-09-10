@@ -32,7 +32,10 @@ export function Achievements({ unlockedAchievements = [], history = [], streak =
                 </span>
               </div>
               <p className="achievement-desc-text">{item.description}</p>
-              {getAchievementProgress(item.id, progress) && <span className="achievement-progress-text">Progress: {getAchievementProgress(item.id, progress)[0]} / {getAchievementProgress(item.id, progress)[1]}</span>}
+              {getAchievementProgress(item.id, progress) && <>
+                <span className="achievement-progress-text">Progress: {getAchievementProgress(item.id, progress)[0]} / {getAchievementProgress(item.id, progress)[1]}</span>
+                <progress className="achievement-progress" max={getAchievementProgress(item.id, progress)[1]} value={getAchievementProgress(item.id, progress)[0]} aria-label={`${item.title}: ${getAchievementProgress(item.id, progress)[0]} of ${getAchievementProgress(item.id, progress)[1]}`} />
+              </>}
             </div>
           );
         })}

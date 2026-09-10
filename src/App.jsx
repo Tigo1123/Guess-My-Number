@@ -37,6 +37,8 @@ import { useTheme } from './hooks/useTheme';
 import { useBackgroundMusic } from './hooks/useBackgroundMusic';
 import { AudioSettings } from './components/AudioSettings';
 import { TodayMissions } from './components/TodayMissions';
+import { MissionToast } from './components/MissionToast';
+import { calculateDailyMissionProgress } from './utils/missions';
 import { parseChallengeUrl, removeChallengeParams } from './utils/challenge';
 import { ChallengeCreator } from './components/ChallengeCreator';
 import { ChallengeInvitation } from './components/ChallengeInvitation';
@@ -47,6 +49,7 @@ import { KeyboardShortcutsSettings } from './components/KeyboardShortcutsSetting
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [missionToast, setMissionToast] = useState(null);
   const [incomingChallenge, setIncomingChallenge] = useState(() => parseChallengeUrl());
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
   const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
@@ -123,6 +126,27 @@ export function App() {
   } = useSoundEffects();
 
   const isGameOver = status !== 'PLAYING';
+
+  const missionStateRef = useRef({ profileId: activeProfileId, initialized: false, completed: new Set() });
+  useEffect(() => {
+    const completed = new Set(calculateDailyMissionProgress(gameHistory).filter((mission) => mission.completed).map((mission) => mission.id));
+    const state = missionStateRef.current;
+    if (state.profileId !== activeProfileId) {
+      missionStateRef.current = { profileId: activeProfileId, initialized: true, completed };
+      setMissionToast(null);
+      return;
+    }
+    if (!state.initialized) {
+      missionStateRef.current = { profileId: activeProfileId, initialized: true, completed };
+      return;
+    }
+    const newlyCompleted = [...completed].find((id) => !state.completed.has(id));
+    missionStateRef.current = { profileId: activeProfileId, initialized: true, completed };
+    if (newlyCompleted) {
+      const mission = calculateDailyMissionProgress(gameHistory).find((item) => item.id === newlyCompleted);
+      if (mission) setMissionToast(mission);
+    }
+  }, [activeProfileId, gameHistory]);
 
   // Sound triggers on state changes
   useEffect(() => {
@@ -206,6 +230,7 @@ export function App() {
       <KeyboardShortcutsPanel open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       {incomingChallenge && <ChallengeInvitation challenge={incomingChallenge} onAccept={acceptFriendChallenge} onDismiss={dismissFriendChallenge} />}
       <AchievementToast toastMessage={toastMessage} />
+      <MissionToast mission={missionToast} onDismiss={() => setMissionToast(null)} />
 
       <Header />
 
@@ -298,6 +323,7 @@ export function App() {
 
             <ProximityIndicator
               proximity={proximity}
+              animationToken={attempts}
             />
 
             <GuessForm
@@ -307,6 +333,7 @@ export function App() {
               disabled={isGameOver}
               isInvalid={isInvalid}
               resetToken={resetToken}
+              feedbackToken={attempts}
             />
 
             <DifficultySelector

@@ -12,6 +12,7 @@ export function SecretNumberDisplay({ status, secretNumber }) {
       <div className={`secret-circle ${isRevealed ? 'revealed' : ''}`}>
         {isRevealed ? secretNumber : '?'}
       </div>
+      {status === 'WON' && <div className="win-particles" aria-hidden="true">{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</div>}
     </div>
   );
 }

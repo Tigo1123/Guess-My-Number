@@ -484,7 +484,7 @@ export function useGameState() {
     if (newUnlocks.length > 0) {
       setAchievements(Array.from(currentUnlocked));
       setUnlockedThisRound((prev) => [...prev, ...newUnlocks]);
-      setToastMessage(newUnlocks[newUnlocks.length - 1]);
+      setToastMessage(newUnlocks);
     }
 
     return newUnlockIds;
