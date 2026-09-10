@@ -2096,9 +2096,8 @@ button:disabled {
 .too-low .direction-feedback-copy strong { color: #38bdf8; }
 .direction-feedback-copy span { color: var(--text-secondary); font-size: 1.25rem; }
 .proximity-feedback.proximity-almost { animation-duration: .38s; }
-.proximity-feedback.proximity-very-close { animation-duration: .34s; }
-.proximity-feedback.proximity-close { animation-duration: .28s; }
-.proximity-feedback.proximity-far { animation-duration: .2s; }
+.proximity-feedback.proximity-high,
+.proximity-feedback.proximity-low { animation-duration: .3s; }
 .correct-feedback { display: flex; justify-content: center; align-items: center; gap: .7rem; color: var(--success); font-size: 1.8rem; animation: number-reveal .42s ease-out both; }
 .correct-feedback-detail { color: var(--text-secondary); font-size: 1.25rem; }
 @keyframes direction-pop-up { from { opacity: .35; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }

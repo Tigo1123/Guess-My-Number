@@ -6,11 +6,10 @@ describe('Phase 21.2 proximity utility', () => {
     expect(getProximityLevel(20, 19, 20)).toMatchObject({ level: 'almost', difference: 1, direction: 'high' });
     expect(getProximityLevel(18, 19, 20)).toMatchObject({ level: 'almost', difference: 1, direction: 'low' });
   });
-  it('scales very close and close thresholds by difficulty range', () => {
-    expect(getProximityLevel(16, 19, 20).level).toBe('very-close');
-    expect(getProximityLevel(15, 19, 50).level).toBe('very-close');
-    expect(getProximityLevel(90, 100, 100).level).toBe('close');
-    expect(getProximityLevel(70, 100, 100).level).toBe('far');
+  it('uses only directional feedback for every non-adjacent guess', () => {
+    expect(getProximityLevel(16, 19, 20)).toMatchObject({ level: 'low', direction: 'low', difference: 3 });
+    expect(getProximityLevel(22, 19, 50)).toMatchObject({ level: 'high', direction: 'high', difference: 3 });
+    expect(getProximityLevel(1, 100, 100)).toMatchObject({ level: 'low', direction: 'low', difference: 99 });
   });
   it('returns null for a correct guess so win state owns the feedback', () => {
     expect(getProximityLevel(19, 19, 20)).toBeNull();

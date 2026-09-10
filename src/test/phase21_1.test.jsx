@@ -12,11 +12,11 @@ describe('Phase 21.1 guess feedback and audio controls', () => {
   it('renders clear directional Too High and Too Low cards', () => {
     const { rerender } = render(<GameStatusMessage message="📉 Too High" maxNumber={50} feedbackToken={1} />);
     expect(screen.getByRole('status')).toHaveTextContent('TOO HIGH');
-    expect(screen.getByRole('status')).toHaveTextContent('Try a smaller number');
+    expect(screen.getByRole('status')).toHaveTextContent('Try a lower number');
     expect(screen.getByRole('status')).toHaveTextContent('⬆️');
     rerender(<GameStatusMessage message="📈 Too Low" maxNumber={50} feedbackToken={2} />);
     expect(screen.getByRole('status')).toHaveTextContent('TOO LOW');
-    expect(screen.getByRole('status')).toHaveTextContent('Try a larger number');
+    expect(screen.getByRole('status')).toHaveTextContent('Try a higher number');
     expect(screen.getByRole('status')).toHaveTextContent('⬇️');
   });
   it('replaces directional feedback with Correct and keeps proximity secondary', () => {
@@ -28,6 +28,19 @@ describe('Phase 21.1 guess feedback and audio controls', () => {
     rerender(<GameStatusMessage message="🎉 Correct Number!" maxNumber={20} proximity={null} feedbackToken={2} />);
     expect(screen.getByRole('status')).toHaveTextContent('CORRECT!');
     expect(screen.queryByText('TOO HIGH')).toBeNull();
+  });
+  it('renders only Almost, Too High, and Too Low proximity states', () => {
+    const { rerender } = render(<GameStatusMessage message="📉 Too High" maxNumber={50} proximity={{ level: 'high', direction: 'high', difference: 4 }} feedbackToken={1} />);
+    expect(screen.getByRole('status')).toHaveTextContent('TOO HIGH');
+    expect(screen.getByRole('status')).toHaveTextContent('Try a lower number');
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Your guess is too high. Try a lower number.');
+    expect(screen.queryByText(/VERY CLOSE|CLOSE|FAR/)).toBeNull();
+    rerender(<GameStatusMessage message="📈 Too Low" maxNumber={50} proximity={{ level: 'low', direction: 'low', difference: 4 }} feedbackToken={2} />);
+    expect(screen.getByRole('status')).toHaveTextContent('TOO LOW');
+    expect(screen.getByRole('status')).toHaveTextContent('Try a higher number');
+    rerender(<GameStatusMessage message="📉 Too High" maxNumber={50} proximity={{ level: 'almost', direction: 'high', difference: 1 }} feedbackToken={3} />);
+    expect(screen.getByRole('status')).toHaveTextContent('ALMOST!');
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Almost. Your guess is slightly too high.');
   });
   it('keeps audio controls to an On/Off music toggle and separate effects toggle', () => {
     render(<AudioSettings musicEnabled={false} onToggleMusic={() => {}} soundEnabled onToggleSound={() => {}} />);
