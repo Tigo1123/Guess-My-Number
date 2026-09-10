@@ -28,9 +28,14 @@ import { AdvancedAnalytics } from './components/AdvancedAnalytics';
 import { useGameState } from './hooks/useGameState';
 import { useSoundEffects } from './hooks/useSoundEffects';
 import { APP_VERSION } from './constants/version';
+import { usePwaStatus } from './hooks/usePwaStatus';
+import { PwaStatusNotice } from './components/PwaStatusNotice';
+import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
+import { InstallAppControl } from './components/InstallAppControl';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
+  const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
 
   const {
     difficulty,
@@ -155,6 +160,8 @@ export function App() {
 
   return (
     <main className="terminal">
+      <PwaStatusNotice isOffline={isOffline} showBackOnline={showBackOnline} />
+      <PwaUpdatePrompt />
       <AchievementToast toastMessage={toastMessage} />
 
       <Header />
@@ -455,6 +462,11 @@ export function App() {
                 {soundEnabled ? 'ON' : 'OFF'}
               </button>
             </div>
+          </section>
+
+          <section className="summary-card-block" aria-label="Install Application">
+            <h2 className="section-title">App</h2>
+            <InstallAppControl canInstall={canInstall} onInstall={install} />
           </section>
 
           {/* 11. BACKUP & RESTORE */}

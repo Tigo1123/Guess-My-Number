@@ -2004,6 +2004,14 @@ button:disabled {
 .advanced-analytics { display: grid; gap: var(--space-md); min-width: 0; width: 100%; max-width: 100%; }
 .advanced-analytics .summary-card-block { min-width: 0; width: 100%; max-width: 100%; }
 .advanced-analytics .metric-box, .advanced-analytics .metric-box-value { min-width: 0; overflow-wrap: anywhere; }
+.pwa-status-notice, .pwa-update-notice { position: fixed; z-index: 20; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; max-width: calc(100% - 2rem); padding: 0.8rem 1.2rem; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg-surface-elevated); color: var(--text-primary); font-size: 1.3rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.pwa-status-notice { top: 1rem; }
+.pwa-status-notice.offline { border-color: var(--warning); }
+.pwa-status-notice.online { border-color: var(--success); }
+.pwa-update-notice { bottom: 1rem; }
+.pwa-update-notice .btn-secondary { min-height: 32px; padding: 0.5rem 1rem; }
+.install-app-control { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.install-app-control .setting-desc-text { margin-top: 0.3rem; }
 .analytics-overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-sm); }
 .analytics-insight { margin: var(--space-md) 0 0; color: var(--text-secondary); font-size: 1.4rem; }
 .recent-performance-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
@@ -2034,4 +2042,7 @@ button:disabled {
   .share-result-actions { flex-direction: column; }
   .share-result-actions button { width: 100%; min-width: 0; }
   .analytics-overview-grid, .mode-analytics-grid { grid-template-columns: 1fr; }
+  .install-app-control { align-items: stretch; flex-direction: column; }
+  .install-app-control .btn-secondary { width: 100%; }
+  .pwa-status-notice, .pwa-update-notice { width: calc(100% - 2rem); justify-content: space-between; }
 }
