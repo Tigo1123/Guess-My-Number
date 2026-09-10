@@ -4,7 +4,9 @@ import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
+import { applyThemePreferences, readAccentPreference, readThemePreference } from './utils/theme';
 
+applyThemePreferences(readThemePreference(), readAccentPreference());
 registerSW({ immediate: true });
 
 ReactDOM.createRoot(document.getElementById('root')).render(

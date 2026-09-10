@@ -1835,6 +1835,43 @@ button:disabled {
   }
 }
 
+/* Phase 17 theme tokens: the layout remains shared across appearances. */
+[data-theme="light"] {
+  --bg-app: #eef1f5;
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-surface-elevated: #ffffff;
+  --bg-input: #f8fafc;
+  --text-primary: #17202b;
+  --text-secondary: #52606d;
+  --text-muted: #73808c;
+  --border: rgba(23, 32, 43, 0.12);
+  --border-strong: rgba(23, 32, 43, 0.22);
+}
+[data-theme="light"] body { background: radial-gradient(circle at top, #f8fafc 0%, #eef1f5 48%, #e6eaf0 100%); }
+[data-theme="light"] body.won { background: radial-gradient(circle at top, #edf9f1 0%, #eef1f5 55%, #e6eaf0 100%); }
+[data-theme="light"] body.lost { background: radial-gradient(circle at top, #fff1f2 0%, #eef1f5 55%, #e6eaf0 100%); }
+[data-theme="light"] .guess-input, [data-theme="light"] .terminal-input { background: var(--bg-input); border-color: var(--border-strong); }
+[data-theme="light"] .btn-primary { color: #ffffff; }
+
+[data-accent="blue"] { --accent: #2563eb; --accent-hover: #1d4ed8; --accent-soft: rgba(37, 99, 235, 0.12); }
+[data-accent="purple"] { --accent: #7c3aed; --accent-hover: #6d28d9; --accent-soft: rgba(124, 58, 237, 0.12); }
+
+.appearance-card { gap: var(--space-md); }
+.appearance-control-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.appearance-options { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.appearance-option { min-height: 36px; padding: 0.6rem 1.1rem; background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.appearance-option:hover { border-color: var(--accent); color: var(--text-primary); }
+.appearance-option.selected { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent-soft); }
+.appearance-option.selected::before { content: '✓ '; font-weight: 700; }
+.appearance-option.accent-green.selected { --accent: #16a34a; }
+.appearance-option.accent-blue.selected { --accent: #2563eb; }
+.appearance-option.accent-purple.selected { --accent: #7c3aed; }
+@media (max-width: 520px) {
+  .appearance-control-group { align-items: flex-start; flex-direction: column; }
+  .appearance-options { width: 100%; }
+  .appearance-option { flex: 1 1 auto; }
+}
+
 /* History Replay Details Modal */
 .history-details-modal {
   position: fixed;

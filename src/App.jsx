@@ -32,10 +32,13 @@ import { usePwaStatus } from './hooks/usePwaStatus';
 import { PwaStatusNotice } from './components/PwaStatusNotice';
 import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
 import { InstallAppControl } from './components/InstallAppControl';
+import { ThemeControls } from './components/ThemeControls';
+import { useTheme } from './hooks/useTheme';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
+  const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
 
   const {
     difficulty,
@@ -463,6 +466,13 @@ export function App() {
               </button>
             </div>
           </section>
+
+          <ThemeControls
+            themePreference={themePreference}
+            accent={accent}
+            onThemeChange={chooseTheme}
+            onAccentChange={chooseAccent}
+          />
 
           <section className="summary-card-block" aria-label="Install Application">
             <h2 className="section-title">App</h2>
