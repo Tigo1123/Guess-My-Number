@@ -24,6 +24,7 @@ import { ProgressBackupControls } from './components/ProgressBackupControls';
 import { PersonalRecords } from './components/PersonalRecords';
 import { GameHistory as CompletedGameHistory } from './components/GameHistory';
 import { GameStatistics } from './components/GameStatistics';
+import { AdvancedAnalytics } from './components/AdvancedAnalytics';
 import { useGameState } from './hooks/useGameState';
 import { useSoundEffects } from './hooks/useSoundEffects';
 import { APP_VERSION } from './constants/version';
@@ -369,6 +370,8 @@ export function App() {
           bestAttempts={bestAttempts}
           onResetStatistics={resetStatistics}
         />
+
+        <AdvancedAnalytics history={gameHistory} />
 
         <PersonalRecords
           statistics={statistics}

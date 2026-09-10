@@ -2000,7 +2000,38 @@ button:disabled {
   color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
+
+.advanced-analytics { display: grid; gap: var(--space-md); min-width: 0; width: 100%; max-width: 100%; }
+.advanced-analytics .summary-card-block { min-width: 0; width: 100%; max-width: 100%; }
+.advanced-analytics .metric-box, .advanced-analytics .metric-box-value { min-width: 0; overflow-wrap: anywhere; }
+.analytics-overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-sm); }
+.analytics-insight { margin: var(--space-md) 0 0; color: var(--text-secondary); font-size: 1.4rem; }
+.recent-performance-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+.recent-performance-item { display: grid; grid-template-columns: auto auto 1fr auto; gap: 0.8rem; align-items: center; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1.3rem; min-width: 0; }
+.recent-performance-item.win { border-left: 3px solid var(--success); }
+.recent-performance-item.loss { border-left: 3px solid var(--text-secondary); }
+.recent-game-number { color: var(--text-secondary); }
+.recent-result { font-weight: 600; }
+.recent-performance-item.win .recent-result { color: var(--success); }
+.analytics-empty { color: var(--text-secondary); margin: 0; }
+.analytics-table { overflow-x: auto; }
+.analytics-table-row { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 0.8rem; align-items: center; padding: 0.9rem 0; border-bottom: 1px solid var(--border); font-size: 1.3rem; }
+.analytics-table-row:last-child { border-bottom: 0; }
+.analytics-table-head { color: var(--text-secondary); font-size: 1.2rem; }
+.mode-analytics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-sm); }
+.mode-analytics-card { display: grid; gap: 0.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1.3rem; min-width: 0; }
+.mode-analytics-card strong { color: var(--text-primary); font-size: 1.5rem; }
+@media (max-width: 900px) {
+  .analytics-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-analytics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .recent-performance-list { grid-template-columns: 1fr; }
+  .analytics-table-row { grid-template-columns: 1.2fr repeat(4, minmax(5.5rem, 1fr)); min-width: 34rem; }
+  .analytics-table { overflow-x: auto; }
+}
 @media (max-width: 360px) {
   .share-result-actions { flex-direction: column; }
   .share-result-actions button { width: 100%; min-width: 0; }
+  .analytics-overview-grid, .mode-analytics-grid { grid-template-columns: 1fr; }
 }
