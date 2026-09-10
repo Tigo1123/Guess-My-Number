@@ -9,6 +9,7 @@ import {
 import { useLocalStorage } from './useLocalStorage';
 import { usePlayerProfiles } from './usePlayerProfiles';
 import { sanitizeGameHistory, generateUUID } from '../utils/profileStorage';
+import { deriveChallengeNumber } from '../utils/challenge';
 
 function generateSecretNumber(maxNumber) {
   return Math.trunc(Math.random() * maxNumber) + 1;
@@ -195,6 +196,8 @@ export function useGameState() {
 
   const [isDailyChallengeActive, setIsDailyChallengeActive] = useState(false);
   const [isPracticeReplay, setIsPracticeReplay] = useState(false);
+  const [isFriendChallengeActive, setIsFriendChallengeActive] = useState(false);
+  const [friendChallengeSeed, setFriendChallengeSeed] = useState(null);
 
   // Profile-scoped persistent progress getters
   const activeProgress = activeProfile ? activeProfile.progress : {};
@@ -325,7 +328,10 @@ export function useGameState() {
     const targetConfig = DIFFICULTIES[targetDifficulty] || DIFFICULTIES[DEFAULT_DIFFICULTY];
     setDifficulty(targetDifficulty);
     setGameMode(targetMode);
-    setSecretNumber(forcedSecretNumber ?? generateSecretNumber(targetConfig.maxNumber));
+    const challengeNumber = isFriendChallengeActive && friendChallengeSeed
+      ? deriveChallengeNumber(friendChallengeSeed, targetDifficulty)
+      : null;
+    setSecretNumber(forcedSecretNumber ?? challengeNumber ?? generateSecretNumber(targetConfig.maxNumber));
     setScore(targetConfig.startingScore);
     setStatus('PLAYING');
     setGuessInput('');
@@ -341,7 +347,7 @@ export function useGameState() {
     setUnlockedThisRound([]);
     setToastMessage(null);
     setResetToken((prev) => prev + 1);
-  }, [difficulty, gameMode]);
+  }, [difficulty, friendChallengeSeed, gameMode, isFriendChallengeActive]);
 
   // Profile switch reset effect
   const prevProfileIdRef = useRef(activeProfileId);
@@ -350,23 +356,25 @@ export function useGameState() {
       prevProfileIdRef.current = activeProfileId;
       setIsDailyChallengeActive(false);
       setIsPracticeReplay(false);
+      setIsFriendChallengeActive(false);
+      setFriendChallengeSeed(null);
       resetGame(DEFAULT_DIFFICULTY, 'classic');
     }
   }, [activeProfileId, resetGame]);
 
   // Change Difficulty
   const changeDifficulty = useCallback((newLevel) => {
-    if (newLevel !== difficulty && !isDailyChallengeActive) {
+    if (newLevel !== difficulty && !isDailyChallengeActive && !isFriendChallengeActive) {
       resetGame(newLevel, gameMode);
     }
-  }, [difficulty, gameMode, isDailyChallengeActive, resetGame]);
+  }, [difficulty, gameMode, isDailyChallengeActive, isFriendChallengeActive, resetGame]);
 
   // Change Game Mode
   const changeGameMode = useCallback((newMode) => {
-    if (newMode !== gameMode && !isDailyChallengeActive) {
+    if (newMode !== gameMode && !isDailyChallengeActive && !isFriendChallengeActive) {
       resetGame(difficulty, newMode);
     }
-  }, [difficulty, gameMode, isDailyChallengeActive, resetGame]);
+  }, [difficulty, gameMode, isDailyChallengeActive, isFriendChallengeActive, resetGame]);
 
   // Start Daily Challenge (Official or Practice Replay)
   const startDailyChallenge = useCallback(() => {
@@ -386,6 +394,23 @@ export function useGameState() {
     setIsDailyChallengeActive(false);
     setIsPracticeReplay(false);
     resetGame(DEFAULT_DIFFICULTY, 'classic');
+  }, [resetGame]);
+
+  const startFriendChallenge = useCallback((targetDifficulty, seed) => {
+    const challengeNumber = deriveChallengeNumber(seed, targetDifficulty);
+    if (!challengeNumber) return false;
+    setIsDailyChallengeActive(false);
+    setIsPracticeReplay(false);
+    setIsFriendChallengeActive(true);
+    setFriendChallengeSeed(seed);
+    resetGame(targetDifficulty, 'classic', challengeNumber);
+    return true;
+  }, [resetGame]);
+
+  const exitFriendChallenge = useCallback(() => {
+    setIsFriendChallengeActive(false);
+    setFriendChallengeSeed(null);
+    resetGame(DEFAULT_DIFFICULTY, 'classic', generateSecretNumber(DIFFICULTIES[DEFAULT_DIFFICULTY].maxNumber));
   }, [resetGame]);
 
   // Input change handler clearing invalid state
@@ -474,13 +499,14 @@ export function useGameState() {
       maxAttempts: entryData.maxAttempts ?? (gameMode === 'limited' ? DIFFICULTIES[difficulty].maxAttempts : null),
       attemptsRemaining: entryData.attemptsRemaining ?? (gameMode === 'limited' ? Math.max(0, DIFFICULTIES[difficulty].maxAttempts - (entryData.attempts ?? attempts)) : null),
       isDailyChallenge: Boolean(isDailyChallengeActive),
+      isFriendChallenge: Boolean(entryData.isFriendChallenge ?? isFriendChallengeActive),
       dailyChallengeType: isDailyChallengeActive ? (isPracticeReplay ? 'practice' : 'official') : null,
       dailyDateKey: isDailyChallengeActive ? todayKey : null,
       achievementsUnlocked: entryData.achievementsUnlocked || [],
     };
 
     setGameHistory((prev) => sanitizeGameHistory([...(prev || []), nextEntry]));
-  }, [attempts, difficulty, gameMode, hintsUsed, isDailyChallengeActive, isPracticeReplay, score, secretNumber, setGameHistory, timeRemaining, todayKey]);
+  }, [attempts, difficulty, gameMode, hintsUsed, isDailyChallengeActive, isFriendChallengeActive, isPracticeReplay, score, secretNumber, setGameHistory, timeRemaining, todayKey]);
 
   // Process Official Daily Completion Result
   const handleOfficialDailyCompletion = useCallback((isWin, finalAttempts, finalScore) => {
@@ -892,6 +918,8 @@ export function useGameState() {
     clearGameHistory,
     isDailyChallengeActive,
     isPracticeReplay,
+    isFriendChallengeActive,
+    friendChallengeSeed,
     profiles,
     activeProfileId,
     activeProfile,
@@ -910,5 +938,7 @@ export function useGameState() {
     startDailyChallenge,
     startPracticeReplay,
     exitDailyChallenge,
+    startFriendChallenge,
+    exitFriendChallenge,
   };
 }

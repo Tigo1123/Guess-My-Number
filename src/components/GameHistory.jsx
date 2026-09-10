@@ -12,7 +12,8 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
     if (filter === 'win') return sorted.filter((h) => h.result === 'WIN');
     if (filter === 'loss') return sorted.filter((h) => h.result === 'LOSS');
     if (['easy', 'medium', 'hard'].includes(filter)) return sorted.filter((h) => h.difficulty === filter);
-    if (['classic', 'timed', 'limited'].includes(filter)) return sorted.filter((h) => h.mode === filter);
+    if (['classic', 'timed', 'limited'].includes(filter)) return sorted.filter((h) => h.mode === filter && !h.isFriendChallenge);
+    if (filter === 'friend') return sorted.filter((h) => h.isFriendChallenge);
     if (filter === 'daily') return sorted.filter((h) => h.isDailyChallenge);
     return sorted;
   }, [history, filter]);
@@ -58,6 +59,7 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
           { key: 'timed', label: 'Timed' },
           { key: 'limited', label: 'Limited' },
           { key: 'daily', label: 'Daily' },
+          { key: 'friend', label: 'Friend Challenge' },
         ].map((item) => (
           <button
             key={item.key}
@@ -138,7 +140,7 @@ export function GameHistory({ history = [], activeProfileName = 'Active Player',
                         {isWin ? 'WIN' : 'LOSS'}
                       </td>
                       <td className="diff-cell" data-label="DIFFICULTY">{entry.difficulty.toUpperCase()}</td>
-                      <td className="mode-cell" data-label="MODE">{entry.mode.toUpperCase()}</td>
+                      <td className="mode-cell" data-label="MODE">{entry.isFriendChallenge ? 'FRIEND CHALLENGE' : entry.mode.toUpperCase()}</td>
                       <td className="score-cell" data-label="SCORE">{entry.score}</td>
                       <td className="attempts-cell" data-label="ATTEMPTS">{entry.attempts}</td>
                       <td className="hints-cell" data-label="HINTS">{entry.hintsUsed}</td>

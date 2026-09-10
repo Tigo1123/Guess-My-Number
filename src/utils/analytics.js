@@ -1,10 +1,10 @@
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
-const MODES = ['classic', 'timed', 'limited', 'daily'];
+const MODES = ['classic', 'timed', 'limited', 'daily', 'friend'];
 
 const finiteNonNegative = (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const isWin = (game) => game?.result === 'WIN' || game?.result === 'WON' || game?.won === true;
 const difficultyOf = (game) => DIFFICULTIES.includes(game?.difficulty) ? game.difficulty : null;
-const modeOf = (game) => game?.isDailyChallenge || game?.dailyDateKey ? 'daily' : MODES.includes(game?.mode) ? game.mode : null;
+const modeOf = (game) => game?.isFriendChallenge ? 'friend' : game?.isDailyChallenge || game?.dailyDateKey ? 'daily' : MODES.includes(game?.mode) ? game.mode : null;
 const attemptsOf = (game) => finiteNonNegative(game?.attempts) ? game.attempts : null;
 
 const emptyDifficulty = () => ({ games: 0, wins: 0, losses: 0, winRate: null, averageAttempts: null });
@@ -101,5 +101,5 @@ export function generatePlayerInsight(analytics) {
 
 export const analyticsLabels = {
   difficulty: { easy: 'Easy', medium: 'Medium', hard: 'Hard' },
-  mode: { classic: 'Classic', timed: 'Timed', limited: 'Limited', daily: 'Daily' },
+  mode: { classic: 'Classic', timed: 'Timed', limited: 'Limited', daily: 'Daily', friend: 'Friend Challenge' },
 };

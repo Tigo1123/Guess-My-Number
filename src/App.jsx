@@ -34,6 +34,9 @@ import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
 import { InstallAppControl } from './components/InstallAppControl';
 import { ThemeControls } from './components/ThemeControls';
 import { useTheme } from './hooks/useTheme';
+import { parseChallengeUrl, removeChallengeParams } from './utils/challenge';
+import { ChallengeCreator } from './components/ChallengeCreator';
+import { ChallengeInvitation } from './components/ChallengeInvitation';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel';
 import { KeyboardShortcutsSettings } from './components/KeyboardShortcutsSettings';
@@ -41,6 +44,7 @@ import { KeyboardShortcutsSettings } from './components/KeyboardShortcutsSetting
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [incomingChallenge, setIncomingChallenge] = useState(() => parseChallengeUrl());
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
   const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
 
@@ -80,6 +84,7 @@ export function App() {
     clearGameHistory,
     isDailyChallengeActive,
     isPracticeReplay,
+    isFriendChallengeActive,
     profiles,
     activeProfileId,
     activeProfile,
@@ -98,6 +103,8 @@ export function App() {
     startDailyChallenge,
     startPracticeReplay,
     exitDailyChallenge,
+    startFriendChallenge,
+    exitFriendChallenge,
   } = useGameState();
 
   const {
@@ -165,6 +172,19 @@ export function App() {
     playHint();
   };
 
+  const clearChallengeUrl = () => {
+    if (typeof window !== 'undefined') window.history.replaceState({}, '', removeChallengeParams(window.location.href));
+  };
+  const acceptFriendChallenge = () => {
+    if (!incomingChallenge) return;
+    if (startFriendChallenge(incomingChallenge.difficulty, incomingChallenge.seed)) {
+      clearChallengeUrl();
+      setIncomingChallenge(null);
+      setActiveTab('PLAY');
+    }
+  };
+  const dismissFriendChallenge = () => { clearChallengeUrl(); setIncomingChallenge(null); };
+
   useKeyboardShortcuts({
     onSubmitGuess: () => { if (!isGameOver && guessInput.trim()) handleGuessSubmit(guessInput); },
     onNewRound: () => resetGame(),
@@ -180,6 +200,7 @@ export function App() {
       <PwaStatusNotice isOffline={isOffline} showBackOnline={showBackOnline} />
       <PwaUpdatePrompt />
       <KeyboardShortcutsPanel open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      {incomingChallenge && <ChallengeInvitation challenge={incomingChallenge} onAccept={acceptFriendChallenge} onDismiss={dismissFriendChallenge} />}
       <AchievementToast toastMessage={toastMessage} />
 
       <Header />
@@ -287,13 +308,13 @@ export function App() {
             <DifficultySelector
               activeDifficulty={difficulty}
               onSelectDifficulty={changeDifficulty}
-              disabled={isDailyChallengeActive}
+              disabled={isDailyChallengeActive || isFriendChallengeActive}
             />
 
             <ModeSelector
               activeMode={gameMode}
               onSelectMode={changeGameMode}
-              disabled={isDailyChallengeActive}
+              disabled={isDailyChallengeActive || isFriendChallengeActive}
             />
 
             <div className="game-actions-bar">
@@ -308,6 +329,7 @@ export function App() {
               <ActionControls
                 onResetGame={resetGame}
               />
+              <ChallengeCreator difficulty={difficulty} />
             </div>
 
             <RoundSummary
@@ -324,6 +346,7 @@ export function App() {
               maxAttempts={config.maxAttempts}
               isDailyChallengeActive={isDailyChallengeActive}
               isPracticeReplay={isPracticeReplay}
+              isFriendChallengeActive={isFriendChallengeActive}
               todayKey={todayKey}
             />
 

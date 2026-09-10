@@ -2,9 +2,10 @@ const MODE_LABELS = { classic: 'Classic', timed: 'Timed Challenge', limited: 'Li
 
 // Explicitly select public result fields; never serialize the round or profile.
 export function generateShareText({ status, difficultyName, gameMode, attempts, score, streak,
-  isDailyChallengeActive, isPracticeReplay, todayKey }) {
+  isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge }) {
   if (status !== 'WON' && status !== 'LOST') return '';
   const lines = ['Guess My Number 🎯'];
+  if (isFriendChallenge) lines.push('Friend Challenge');
   if (isDailyChallengeActive) {
     lines.push(isPracticeReplay ? 'Daily Challenge • Practice Replay' : 'Daily Challenge');
     if (/^\d{4}-\d{2}-\d{2}$/.test(todayKey || '')) {
@@ -14,7 +15,9 @@ export function generateShareText({ status, difficultyName, gameMode, attempts, 
       }).format(date));
     }
   }
-  const description = [difficultyName, MODE_LABELS[gameMode]].filter(Boolean).join(' • ');
+  const description = isFriendChallenge
+    ? difficultyName
+    : [difficultyName, MODE_LABELS[gameMode]].filter(Boolean).join(' • ');
   if (description) lines.push(description);
   const hasAttempts = Number.isFinite(attempts);
   if (status === 'WON') {

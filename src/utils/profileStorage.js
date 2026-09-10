@@ -102,6 +102,7 @@ export function sanitizeGameHistory(raw) {
       maxAttempts,
       attemptsRemaining,
       isDailyChallenge,
+      isFriendChallenge: Boolean(entry.isFriendChallenge),
       dailyChallengeType,
       dailyDateKey,
       achievementsUnlocked,

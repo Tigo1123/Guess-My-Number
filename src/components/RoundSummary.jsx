@@ -17,12 +17,13 @@ export function RoundSummary({
   isPracticeReplay,
   todayKey,
   streak,
+  isFriendChallengeActive,
 }) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
   const isWin = status === 'WON';
   const shareText = generateShareText({ status, difficultyName, gameMode, score, attempts,
-    streak, isDailyChallengeActive, isPracticeReplay, todayKey });
+    streak, isDailyChallengeActive, isPracticeReplay, todayKey, isFriendChallenge: isFriendChallengeActive });
   const isTimedMode = gameMode === 'timed';
   const isLimitedMode = gameMode === 'limited';
 
@@ -38,6 +39,7 @@ export function RoundSummary({
         ROUND SUMMARY: {isWin ? 'VICTORY' : 'GAME OVER'}
       </h2>
       <div className="summary-grid">
+        {isFriendChallengeActive && <div className="summary-item full-width highlight"><span className="summary-label">CHALLENGE:</span><span className="summary-value">FRIEND CHALLENGE</span></div>}
         {isDailyChallengeActive && (
           <div className="summary-item full-width highlight">
             <span className="summary-label">DAILY CHALLENGE [{todayKey}]:</span>

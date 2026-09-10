@@ -1875,6 +1875,14 @@ button:disabled {
 .shortcut-row kbd { display: inline-block; padding: 0.3rem 0.6rem; text-align: center; color: var(--text-primary); background: var(--bg-surface-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 1.3rem; }
 .shortcut-close-button { width: 100%; }
 .keyboard-shortcuts-settings .setting-desc-text { margin-top: 0.3rem; }
+.challenge-create-button { flex: 1 1 auto; }
+.challenge-dialog h2 { margin-bottom: var(--space-sm); }
+.challenge-link-label { display: block; margin-top: var(--space-md); color: var(--text-secondary); font-size: 1.3rem; }
+.challenge-link-input { width: 100%; margin-top: 0.5rem; padding: 0.8rem; color: var(--text-primary); background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1.2rem; }
+.challenge-dialog-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: var(--space-md); }
+.challenge-dialog-actions button { flex: 1 1 14rem; }
+.challenge-feedback { min-height: 1.5em; margin-top: 0.8rem; color: var(--text-secondary); font-size: 1.3rem; }
+.challenge-difficulty { margin-top: var(--space-md); font-size: 1.6rem; }
 @media (max-width: 520px) {
   .appearance-control-group { align-items: flex-start; flex-direction: column; }
   .appearance-options { width: 100%; }
