@@ -285,6 +285,7 @@ export function App() {
             </div>
 
             <RoundSummary
+              streak={streak.currentStreak}
               status={status}
               difficultyName={config.name}
               gameMode={gameMode}

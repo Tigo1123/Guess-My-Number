@@ -1978,3 +1978,29 @@ button:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* Completed-round sharing uses one set of controls at every viewport. */
+.share-result {
+  margin-top: var(--space-md);
+  min-width: 0;
+}
+.share-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.share-result-actions button {
+  min-width: 12rem;
+  max-width: 100%;
+}
+.share-result-feedback {
+  min-height: 3em;
+  margin: 0.8rem 0 0;
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 360px) {
+  .share-result-actions { flex-direction: column; }
+  .share-result-actions button { width: 100%; min-width: 0; }
+}

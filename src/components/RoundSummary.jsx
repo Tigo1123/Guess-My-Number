@@ -1,4 +1,6 @@
 import React from 'react';
+import { ShareResultControls } from './ShareResultControls';
+import { generateShareText } from '../utils/shareResult';
 
 export function RoundSummary({
   status,
@@ -14,10 +16,13 @@ export function RoundSummary({
   isDailyChallengeActive,
   isPracticeReplay,
   todayKey,
+  streak,
 }) {
   if (status !== 'WON' && status !== 'LOST') return null;
 
   const isWin = status === 'WON';
+  const shareText = generateShareText({ status, difficultyName, gameMode, score, attempts,
+    streak, isDailyChallengeActive, isPracticeReplay, todayKey });
   const isTimedMode = gameMode === 'timed';
   const isLimitedMode = gameMode === 'limited';
 
@@ -99,6 +104,7 @@ export function RoundSummary({
           </div>
         )}
       </div>
+      <ShareResultControls key={shareText} text={shareText} />
     </section>
   );
 }
