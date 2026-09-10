@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   plugins: [react(), VitePWA({
     registerType: 'prompt',
-    includeAssets: ['icon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+    includeAssets: ['icon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'audio/ambient-loop.wav'],
     manifest: {
       name: 'Guess My Number',
       short_name: 'Guess Number',

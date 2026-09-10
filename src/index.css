@@ -2068,6 +2068,22 @@ button:disabled {
 .pwa-update-notice .btn-secondary { min-height: 32px; padding: 0.5rem 1rem; }
 .install-app-control { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
 .install-app-control .setting-desc-text { margin-top: 0.3rem; }
+.audio-settings { gap: var(--space-md); }
+.music-volume-control { display: grid; gap: 0.7rem; }
+.music-volume-control .setting-label-title { display: flex; justify-content: space-between; gap: 1rem; }
+.music-volume-control output { color: var(--accent); font-family: var(--font-mono); }
+.music-volume-control input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.btn-music-toggle { min-width: 5.5rem; }
+.mission-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); }
+.mission-card { display: grid; gap: .65rem; min-width: 0; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.mission-card.completed { border-color: var(--success); }
+.mission-card h3 { margin: 0; font-size: 1.45rem; overflow-wrap: anywhere; }
+.mission-card p { margin: 0; color: var(--text-secondary); font-size: 1.25rem; overflow-wrap: anywhere; }
+.mission-card progress { width: 100%; height: .7rem; accent-color: var(--accent); }
+.mission-card strong { font-family: var(--font-mono); font-size: 1.2rem; color: var(--text-primary); }
+.mission-card-header { display: flex; justify-content: space-between; gap: .6rem; align-items: baseline; min-width: 0; }
+.mission-card-header span { color: var(--text-secondary); font-size: 1.05rem; white-space: nowrap; }
+.achievement-progress-text { margin: .35rem 0 0; color: var(--text-secondary); font-family: var(--font-mono); font-size: 1.15rem; }
 .analytics-overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-sm); }
 .analytics-insight { margin: var(--space-md) 0 0; color: var(--text-secondary); font-size: 1.4rem; }
 .recent-performance-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
@@ -2088,6 +2104,7 @@ button:disabled {
 @media (max-width: 900px) {
   .analytics-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mode-analytics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
   .recent-performance-list { grid-template-columns: 1fr; }
@@ -2098,6 +2115,7 @@ button:disabled {
   .share-result-actions { flex-direction: column; }
   .share-result-actions button { width: 100%; min-width: 0; }
   .analytics-overview-grid, .mode-analytics-grid { grid-template-columns: 1fr; }
+  .mission-grid { grid-template-columns: 1fr; }
   .install-app-control { align-items: stretch; flex-direction: column; }
   .install-app-control .btn-secondary { width: 100%; }
   .pwa-status-notice, .pwa-update-notice { width: calc(100% - 2rem); justify-content: space-between; }

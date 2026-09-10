@@ -6,7 +6,7 @@ export const ACHIEVEMENTS = [
   },
   {
     id: 'ON_FIRE',
-    title: 'On Fire',
+    title: 'Hot Streak',
     description: 'Reach a win streak of 3.',
   },
   {
@@ -31,7 +31,7 @@ export const ACHIEVEMENTS = [
   },
   {
     id: 'VETERAN',
-    title: 'Veteran',
+    title: 'Dedicated Player',
     description: 'Complete 10 total games.',
   },
   {
@@ -39,6 +39,10 @@ export const ACHIEVEMENTS = [
     title: 'No Help Needed',
     description: 'Win a round without using any hints.',
   },
+  { id: 'VETERAN_25', title: 'Veteran Player', description: 'Complete 25 total games.' },
+  { id: 'CHALLENGER', title: 'Challenger', description: 'Complete a Friend Challenge.' },
+  { id: 'DIFFICULTY_MASTER', title: 'Difficulty Master', description: 'Win at least one game in Easy, Medium, and Hard.' },
+  { id: 'MODE_MASTER', title: 'Mode Master', description: 'Win a Classic, Timed, Limited, Daily, and Friend Challenge game.' },
   {
     id: 'DAILY_DEBUT',
     title: 'Daily Debut',

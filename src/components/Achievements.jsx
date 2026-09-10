@@ -1,10 +1,12 @@
 import React from 'react';
 import { ACHIEVEMENTS } from '../constants/achievements';
+import { calculateAchievementProgress, getAchievementProgress } from '../utils/achievements';
 
-export function Achievements({ unlockedAchievements = [] }) {
+export function Achievements({ unlockedAchievements = [], history = [], streak = 0 }) {
   const unlockedSet = new Set(unlockedAchievements);
   const totalCount = ACHIEVEMENTS.length;
   const unlockedCount = unlockedSet.size;
+  const progress = calculateAchievementProgress(history, streak);
 
   return (
     <section className="summary-card-block" aria-label="Game Achievements">
@@ -30,6 +32,7 @@ export function Achievements({ unlockedAchievements = [] }) {
                 </span>
               </div>
               <p className="achievement-desc-text">{item.description}</p>
+              {getAchievementProgress(item.id, progress) && <span className="achievement-progress-text">Progress: {getAchievementProgress(item.id, progress)[0]} / {getAchievementProgress(item.id, progress)[1]}</span>}
             </div>
           );
         })}

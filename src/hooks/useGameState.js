@@ -435,6 +435,8 @@ export function useGameState() {
       hintsCount,
       isOfficialDaily,
       nextDailyStreakCount,
+      isFriendChallenge,
+      completedHistory = [],
     } = context;
 
     const currentUnlocked = new Set(achievements);
@@ -452,6 +454,8 @@ export function useGameState() {
       }
     };
 
+    if (isFriendChallenge) tryUnlock('CHALLENGER');
+
     if (isWin) {
       if (totalWinsCount >= 1) tryUnlock('FIRST_WIN');
       if (newCurrentStreak >= 3) tryUnlock('ON_FIRE');
@@ -463,6 +467,11 @@ export function useGameState() {
       if (difficultyLevel === 'hard') tryUnlock('HARD_MODE_HERO');
       if (hintsCount === 0) tryUnlock('NO_HELP_NEEDED');
       if (isOfficialDaily) tryUnlock('DAILY_WINNER');
+      if (totalGamesCount >= 25) tryUnlock('VETERAN_25');
+      const completed = [...completedHistory, { result: 'WIN', difficulty: difficultyLevel, mode, isDailyChallenge: isOfficialDaily, isFriendChallenge }];
+      if (new Set(completed.filter((game) => game.result === 'WIN').map((game) => game.difficulty)).size >= 3) tryUnlock('DIFFICULTY_MASTER');
+      const modeSet = new Set(completed.filter((game) => game.result === 'WIN').map((game) => game.isFriendChallenge ? 'friend' : game.isDailyChallenge ? 'daily' : game.mode));
+      if (['classic', 'timed', 'limited', 'daily', 'friend'].every((key) => modeSet.has(key))) tryUnlock('MODE_MASTER');
     }
 
     if (isOfficialDaily) {
@@ -575,6 +584,8 @@ export function useGameState() {
         remainingTime: 0,
         hintsCount: hintsUsed,
         isOfficialDaily,
+        isFriendChallenge: isFriendChallengeActive,
+        completedHistory: gameHistory,
         nextDailyStreakCount: nextDailyStreakCount || 0,
       });
 
@@ -603,7 +614,7 @@ export function useGameState() {
         },
       };
     });
-  }, [attempts, difficulty, evaluateAchievements, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isPracticeReplay, setStatistics, setStreak, status]);
+  }, [attempts, difficulty, evaluateAchievements, gameMode, gameHistory, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isFriendChallengeActive, isPracticeReplay, setStatistics, setStreak, status]);
 
   // Timed Mode Countdown Effect
   useEffect(() => {
@@ -760,6 +771,8 @@ export function useGameState() {
           remainingTime: timeRemaining,
           hintsCount: hintsUsed,
           isOfficialDaily,
+          isFriendChallenge: isFriendChallengeActive,
+          completedHistory: gameHistory,
           nextDailyStreakCount: nextDailyStreakCount || 0,
         });
 
@@ -839,6 +852,8 @@ export function useGameState() {
           remainingTime: timeRemaining,
           hintsCount: hintsUsed,
           isOfficialDaily,
+          isFriendChallenge: isFriendChallengeActive,
+          completedHistory: gameHistory,
           nextDailyStreakCount: nextDailyStreakCount || 0,
         });
 
@@ -880,7 +895,7 @@ export function useGameState() {
         totalValidGuesses: prev.totalValidGuesses + 1,
       }));
     }
-  }, [attempts, config.maxAttempts, config.maxNumber, difficulty, evaluateAchievements, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isPracticeReplay, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
+  }, [attempts, config.maxAttempts, config.maxNumber, difficulty, evaluateAchievements, gameHistory, gameMode, handleOfficialDailyCompletion, hintsUsed, isDailyChallengeActive, isFriendChallengeActive, isPracticeReplay, score, secretNumber, setBestAttempts, setHighScores, setStatistics, setStreak, status, timeRemaining]);
 
   return {
     difficulty,

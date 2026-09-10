@@ -34,6 +34,9 @@ import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
 import { InstallAppControl } from './components/InstallAppControl';
 import { ThemeControls } from './components/ThemeControls';
 import { useTheme } from './hooks/useTheme';
+import { useBackgroundMusic } from './hooks/useBackgroundMusic';
+import { AudioSettings } from './components/AudioSettings';
+import { TodayMissions } from './components/TodayMissions';
 import { parseChallengeUrl, removeChallengeParams } from './utils/challenge';
 import { ChallengeCreator } from './components/ChallengeCreator';
 import { ChallengeInvitation } from './components/ChallengeInvitation';
@@ -47,6 +50,7 @@ export function App() {
   const [incomingChallenge, setIncomingChallenge] = useState(() => parseChallengeUrl());
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
   const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
+  const { musicEnabled, musicVolume, setMusicVolume, toggleMusic } = useBackgroundMusic();
 
   const {
     difficulty,
@@ -421,6 +425,8 @@ export function App() {
 
         <AdvancedAnalytics history={gameHistory} />
 
+        <TodayMissions history={gameHistory} />
+
         <PersonalRecords
           statistics={statistics}
           streak={streak}
@@ -432,6 +438,8 @@ export function App() {
 
         <Achievements
           unlockedAchievements={achievements}
+          history={gameHistory}
+          streak={streak.currentStreak}
         />
       </div>
 
@@ -489,21 +497,9 @@ export function App() {
           {/* 12. PREFERENCES */}
           <section className="summary-card-block" aria-label="Game Preferences">
             <h2 className="section-title">Preferences</h2>
-            <div className="preference-setting-row">
-              <div className="setting-info">
-                <span className="setting-label-title">Sound effects</span>
-                <p className="setting-desc-text">Play feedback sounds during the game.</p>
-              </div>
-              <button
-                type="button"
-                className={`btn-sound-toggle ${soundEnabled ? 'on' : 'off'}`}
-                aria-pressed={soundEnabled}
-                onClick={toggleSound}
-              >
-                {soundEnabled ? 'ON' : 'OFF'}
-              </button>
-            </div>
           </section>
+
+          <AudioSettings musicEnabled={musicEnabled} musicVolume={musicVolume} onToggleMusic={toggleMusic} onVolumeChange={setMusicVolume} soundEnabled={soundEnabled} onToggleSound={toggleSound} />
 
           <ThemeControls
             themePreference={themePreference}
