@@ -1866,10 +1866,21 @@ button:disabled {
 .appearance-option.accent-green.selected { --accent: #16a34a; }
 .appearance-option.accent-blue.selected { --accent: #2563eb; }
 .appearance-option.accent-purple.selected { --accent: #7c3aed; }
+.shortcut-backdrop { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 1.6rem; background: rgba(0, 0, 0, 0.48); }
+.shortcut-dialog { width: min(42rem, 100%); max-height: calc(100vh - 3.2rem); overflow-y: auto; padding: var(--space-lg); background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: 0 18px 60px rgba(0,0,0,0.3); }
+.shortcut-dialog-header, .shortcut-settings-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.shortcut-dialog-header h2 { margin: 0; }
+.shortcut-list { display: grid; gap: 0.7rem; margin: var(--space-md) 0; }
+.shortcut-row { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: var(--space-md); padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+.shortcut-row kbd { display: inline-block; padding: 0.3rem 0.6rem; text-align: center; color: var(--text-primary); background: var(--bg-surface-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 1.3rem; }
+.shortcut-close-button { width: 100%; }
+.keyboard-shortcuts-settings .setting-desc-text { margin-top: 0.3rem; }
 @media (max-width: 520px) {
   .appearance-control-group { align-items: flex-start; flex-direction: column; }
   .appearance-options { width: 100%; }
   .appearance-option { flex: 1 1 auto; }
+  .shortcut-settings-row { align-items: stretch; flex-direction: column; }
+  .shortcut-settings-row .btn-secondary { width: 100%; }
 }
 
 /* History Replay Details Modal */

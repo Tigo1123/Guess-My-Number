@@ -34,9 +34,13 @@ import { PwaUpdatePrompt } from './components/PwaUpdatePrompt';
 import { InstallAppControl } from './components/InstallAppControl';
 import { ThemeControls } from './components/ThemeControls';
 import { useTheme } from './hooks/useTheme';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel';
+import { KeyboardShortcutsSettings } from './components/KeyboardShortcutsSettings';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
   const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
 
@@ -161,10 +165,21 @@ export function App() {
     playHint();
   };
 
+  useKeyboardShortcuts({
+    onSubmitGuess: () => { if (!isGameOver && guessInput.trim()) handleGuessSubmit(guessInput); },
+    onNewRound: () => resetGame(),
+    onHint: () => { if (!isGameOver && canAffordHint) handleGetHint(); },
+    onNavigate: (key) => setActiveTab({ 1: 'PLAY', 2: 'STATS', 3: 'HISTORY', 4: 'PLAYERS', 5: 'SETTINGS' }[key]),
+    onOpenHelp: () => setShortcutsOpen(true),
+    onCloseHelp: () => setShortcutsOpen(false),
+    helpOpen: shortcutsOpen,
+  });
+
   return (
     <main className="terminal">
       <PwaStatusNotice isOffline={isOffline} showBackOnline={showBackOnline} />
       <PwaUpdatePrompt />
+      <KeyboardShortcutsPanel open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <AchievementToast toastMessage={toastMessage} />
 
       <Header />
@@ -473,6 +488,8 @@ export function App() {
             onThemeChange={chooseTheme}
             onAccentChange={chooseAccent}
           />
+
+          <KeyboardShortcutsSettings onOpen={() => setShortcutsOpen(true)} />
 
           <section className="summary-card-block" aria-label="Install Application">
             <h2 className="section-title">App</h2>
