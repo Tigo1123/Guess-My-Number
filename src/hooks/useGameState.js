@@ -10,16 +10,10 @@ import { useLocalStorage } from './useLocalStorage';
 import { usePlayerProfiles } from './usePlayerProfiles';
 import { sanitizeGameHistory, generateUUID } from '../utils/profileStorage';
 import { deriveChallengeNumber } from '../utils/challenge';
+import { getProximityLevel } from '../utils/proximity';
 
 function generateSecretNumber(maxNumber) {
   return Math.trunc(Math.random() * maxNumber) + 1;
-}
-
-function calculateProximity(distance) {
-  if (distance <= 2) return 'Burning Hot';
-  if (distance <= 5) return 'Hot';
-  if (distance <= 10) return 'Warm';
-  return 'Cold';
 }
 
 function sanitizeNonNegativeInt(val) {
@@ -807,8 +801,7 @@ export function useGameState() {
       return;
     }
 
-    const distance = Math.abs(num - secretNumber);
-    const prox = calculateProximity(distance);
+    const prox = getProximityLevel(num, secretNumber, config.maxNumber);
     setProximity(prox);
 
     const resultLabel = num > secretNumber ? 'Too High' : 'Too Low';

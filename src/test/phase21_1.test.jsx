@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { GameStatusMessage } from '../components/GameStatusMessage';
 import { ProximityIndicator } from '../components/ProximityIndicator';
 import { AudioSettings } from '../components/AudioSettings';
+import { getProximityLevel } from '../utils/proximity';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -19,10 +20,12 @@ describe('Phase 21.1 guess feedback and audio controls', () => {
     expect(screen.getByRole('status')).toHaveTextContent('⬇️');
   });
   it('replaces directional feedback with Correct and keeps proximity secondary', () => {
-    const { rerender } = render(<GameStatusMessage message="📉 Too High" maxNumber={20} feedbackToken={1} />);
+    const { rerender } = render(<GameStatusMessage message="📉 Too High" maxNumber={20} proximity={{ level: 'almost', direction: 'high', difference: 1 }} feedbackToken={1} />);
     render(<ProximityIndicator proximity="Warm" animationToken={1} />);
     expect(screen.getByText('Proximity: Warm')).toBeInTheDocument();
-    rerender(<GameStatusMessage message="🎉 Correct Number!" maxNumber={20} feedbackToken={2} />);
+    expect(screen.getByRole('status')).toHaveTextContent('ALMOST!');
+    expect(screen.getByRole('status')).toHaveTextContent('Just a little too high');
+    rerender(<GameStatusMessage message="🎉 Correct Number!" maxNumber={20} proximity={null} feedbackToken={2} />);
     expect(screen.getByRole('status')).toHaveTextContent('CORRECT!');
     expect(screen.queryByText('TOO HIGH')).toBeNull();
   });

@@ -1,9 +1,25 @@
 import React from 'react';
 
-export function GameStatusMessage({ message, maxNumber, feedbackToken = 0 }) {
+export function GameStatusMessage({ message, maxNumber, proximity, feedbackToken = 0 }) {
   const tooHigh = typeof message === 'string' && message.includes('Too High');
   const tooLow = typeof message === 'string' && message.includes('Too Low');
   const correct = typeof message === 'string' && message.toLowerCase().includes('correct');
+  if (proximity && typeof proximity === 'object') {
+    const high = proximity.direction === 'high';
+    const levelLabel = proximity.level === 'almost' ? 'ALMOST!' : proximity.level === 'very-close' ? 'VERY CLOSE!' : proximity.level === 'close' ? 'CLOSE' : 'FAR';
+    const primaryIcon = proximity.level === 'almost' ? '🔥' : proximity.level === 'very-close' ? '✨' : '';
+    const guidance = proximity.level === 'almost' ? `Just a little too ${high ? 'high' : 'low'}` : proximity.level === 'very-close' ? `Try slightly ${high ? 'lower' : 'higher'}` : `${high ? 'Try lower' : 'Try higher'}`;
+    return <>
+      <div className={`direction-feedback proximity-feedback proximity-${proximity.level} ${high ? 'too-high' : 'too-low'}`} key={`${proximity.level}-${proximity.direction}-${feedbackToken}`} role="status" aria-live="polite" aria-label={`${levelLabel.replace('!', '')}. Your guess is slightly too ${high ? 'high' : 'low'}.`}>
+        <span className="direction-feedback-arrow" aria-hidden="true">{primaryIcon || (high ? '⬆️' : '⬇️')}</span>
+        <span className="direction-feedback-copy"><strong>{levelLabel}</strong><span>{guidance} <b aria-hidden="true">{high ? '↑' : '↓'}</b></span></span>
+      </div>
+      <p className="rang">Guess a Number between 1 and {maxNumber}</p>
+    </>;
+  }
+  if (correct) {
+    return <><div className="correct-feedback" role="status" aria-live="polite"><span aria-hidden="true">🎯</span><strong>CORRECT!</strong><span className="correct-feedback-detail">Correct Number</span></div><p className="rang">Guess a Number between 1 and {maxNumber}</p></>;
+  }
   if (tooHigh || tooLow) {
     const high = tooHigh;
     return <>
@@ -13,9 +29,6 @@ export function GameStatusMessage({ message, maxNumber, feedbackToken = 0 }) {
       </div>
       <p className="rang">Guess a Number between 1 and {maxNumber}</p>
     </>;
-  }
-  if (correct) {
-    return <><div className="correct-feedback" role="status" aria-live="polite"><span aria-hidden="true">🎯</span><strong>CORRECT!</strong><span className="correct-feedback-detail">Correct Number</span></div><p className="rang">Guess a Number between 1 and {maxNumber}</p></>;
   }
   return (
     <>

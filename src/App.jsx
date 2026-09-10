@@ -319,13 +319,11 @@ export function App() {
             <GameStatusMessage
               message={message}
               maxNumber={config.maxNumber}
+              proximity={proximity}
               feedbackToken={attempts}
             />
 
-            <ProximityIndicator
-              proximity={proximity}
-              animationToken={attempts}
-            />
+            {typeof proximity === 'string' && <ProximityIndicator proximity={proximity} animationToken={attempts} />}
 
             <GuessForm
               guessInput={guessInput}
