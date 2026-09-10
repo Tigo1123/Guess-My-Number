@@ -10,7 +10,7 @@ describe('Phase 20 engagement UI', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     expect(screen.getByRole('region', { name: 'Audio' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Background Music Off/i })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('slider', { name: /Music volume/i })).toBeInTheDocument();
+    expect(screen.queryByRole('slider', { name: /Music volume/i })).toBeNull();
     expect(screen.getByRole('button', { name: /Sound Effects/i })).toBeInTheDocument();
   });
   it('renders today missions and achievement progress on Stats', () => {

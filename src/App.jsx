@@ -53,7 +53,7 @@ export function App() {
   const [incomingChallenge, setIncomingChallenge] = useState(() => parseChallengeUrl());
   const { canInstall, install, isOffline, showBackOnline } = usePwaStatus();
   const { themePreference, accent, chooseTheme, chooseAccent } = useTheme();
-  const { musicEnabled, musicVolume, setMusicVolume, toggleMusic } = useBackgroundMusic();
+  const { musicEnabled, toggleMusic } = useBackgroundMusic();
 
   const {
     difficulty,
@@ -319,6 +319,7 @@ export function App() {
             <GameStatusMessage
               message={message}
               maxNumber={config.maxNumber}
+              feedbackToken={attempts}
             />
 
             <ProximityIndicator
@@ -526,7 +527,7 @@ export function App() {
             <h2 className="section-title">Preferences</h2>
           </section>
 
-          <AudioSettings musicEnabled={musicEnabled} musicVolume={musicVolume} onToggleMusic={toggleMusic} onVolumeChange={setMusicVolume} soundEnabled={soundEnabled} onToggleSound={toggleSound} />
+          <AudioSettings musicEnabled={musicEnabled} onToggleMusic={toggleMusic} soundEnabled={soundEnabled} onToggleSound={toggleSound} />
 
           <ThemeControls
             themePreference={themePreference}

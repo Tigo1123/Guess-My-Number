@@ -2085,6 +2085,17 @@ button:disabled {
 .mission-card-header span { color: var(--text-secondary); font-size: 1.05rem; white-space: nowrap; }
 .achievement-progress-text { margin: .35rem 0 0; color: var(--text-secondary); font-family: var(--font-mono); font-size: 1.15rem; }
 .achievement-progress { width: 100%; height: .55rem; accent-color: var(--accent); }
+.direction-feedback { display: flex; align-items: center; justify-content: center; gap: .9rem; width: min(100%, 30rem); margin: 0 auto; padding: 1rem 1.2rem; border: 1px solid var(--warning); border-radius: var(--radius-md); background: var(--bg-surface); box-shadow: 0 8px 20px rgba(0,0,0,.12); animation: direction-pop-up .32s ease-out both; }
+.direction-feedback.too-low { border-color: #38bdf8; background: var(--bg-surface); animation-name: direction-pop-down; }
+.direction-feedback-arrow { flex: 0 0 auto; font-size: 2.5rem; line-height: 1; }
+.direction-feedback-copy { display: grid; gap: .1rem; text-align: left; }
+.direction-feedback-copy strong { color: var(--warning); font-size: 1.65rem; letter-spacing: .06em; }
+.too-low .direction-feedback-copy strong { color: #38bdf8; }
+.direction-feedback-copy span { color: var(--text-secondary); font-size: 1.25rem; }
+.correct-feedback { display: flex; justify-content: center; align-items: center; gap: .7rem; color: var(--success); font-size: 1.8rem; animation: number-reveal .42s ease-out both; }
+.correct-feedback-detail { color: var(--text-secondary); font-size: 1.25rem; }
+@keyframes direction-pop-up { from { opacity: .35; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes direction-pop-down { from { opacity: .35; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Phase 21: short, transform/opacity based feedback. */
 body, .card-panel, .summary-card-block, .app-nav, .nav-tab, button, input, .secret-number-container, .secret-circle {
