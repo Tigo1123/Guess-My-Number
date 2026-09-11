@@ -1,6 +1,8 @@
 import React from 'react';
 import { ACHIEVEMENTS } from '../constants/achievements';
 import { calculateAchievementProgress, getAchievementProgress } from '../utils/achievements';
+import { AppImage } from './AppImage';
+import { ACHIEVEMENT_IMAGES } from '../utils/imageAssets';
 
 export function Achievements({ unlockedAchievements = [], history = [], streak = 0 }) {
   const unlockedSet = new Set(unlockedAchievements);
@@ -26,6 +28,7 @@ export function Achievements({ unlockedAchievements = [], history = [], streak =
               className={`achievement-card-compact ${isUnlocked ? 'unlocked' : 'locked'}`}
             >
               <div className="achievement-card-top">
+                {ACHIEVEMENT_IMAGES[item.id] && <AppImage src={ACHIEVEMENT_IMAGES[item.id]} alt={`${item.title} achievement badge`} className="achievement-image" />}
                 <span className="achievement-title-text">{item.title}</span>
                 <span className={`achievement-status-badge ${isUnlocked ? 'unlocked' : 'locked'}`}>
                   {isUnlocked ? 'UNLOCKED' : 'LOCKED'}

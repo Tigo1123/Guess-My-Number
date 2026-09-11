@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { createChallengeUrl, generateChallengeSeed } from '../utils/challenge';
+import { AppImage } from './AppImage';
+import { CHALLENGE_IMAGES } from '../utils/imageAssets';
 
 export function ChallengeCreator({ difficulty }) {
   const [open, setOpen] = useState(false);
@@ -12,7 +14,7 @@ export function ChallengeCreator({ difficulty }) {
     <button type="button" className="btn-secondary challenge-create-button" onClick={create}>Challenge a Friend</button>
     {open && <div className="shortcut-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
       <section className="shortcut-dialog challenge-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-create-title">
-        <h2 id="challenge-create-title">Challenge a Friend</h2><p className="setting-desc-text">Difficulty: <strong>{difficulty[0].toUpperCase() + difficulty.slice(1)}</strong></p>
+        <h2 id="challenge-create-title">Challenge a Friend</h2><AppImage src={CHALLENGE_IMAGES.friend} alt="Friend Challenge illustration" className="challenge-dialog-image" /><p className="setting-desc-text">Difficulty: <strong>{difficulty[0].toUpperCase() + difficulty.slice(1)}</strong></p>
         <label className="challenge-link-label" htmlFor="challenge-link">Challenge link</label><input id="challenge-link" className="challenge-link-input" readOnly value={url} />
         <div className="challenge-dialog-actions"><button type="button" className="btn-primary" onClick={copy}>Copy Challenge Link</button>{typeof navigator.share === 'function' && <button type="button" className="btn-secondary" onClick={share}>Share Challenge</button>}<button type="button" className="btn-secondary" onClick={() => setOpen(false)}>Close</button></div>
         <p className="challenge-feedback" role="status" aria-live="polite">{feedback}</p>

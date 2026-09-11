@@ -11,6 +11,7 @@ import {
   INITIAL_BEST_ATTEMPTS,
   INITIAL_DAILY_STREAK,
 } from '../hooks/useGameState';
+import { AVATAR_FALLBACK, AVATAR_IMAGES } from './imageAssets';
 
 export const PROFILES_STORAGE_KEY = 'guess_my_number_profiles';
 
@@ -57,6 +58,10 @@ function sanitizeNonNegativeInt(val) {
 
 function sanitizeBestEndlessStreak(val) {
   return sanitizeNonNegativeInt(val);
+}
+
+export function sanitizeAvatar(val) {
+  return AVATAR_IMAGES.includes(val) ? val : AVATAR_FALLBACK;
 }
 
 export function sanitizeGameHistory(raw) {
@@ -159,6 +164,7 @@ export function sanitizeProfilesPayload(raw) {
   const defaultProfile = {
     id: defaultProfileId,
     name: 'Player 1',
+    avatar: AVATAR_FALLBACK,
     createdAt: now,
     updatedAt: now,
     progress: createEmptyProgress(),
@@ -210,6 +216,7 @@ export function sanitizeProfilesPayload(raw) {
     validProfiles.push({
       id,
       name: uniqueName,
+      avatar: sanitizeAvatar(p.avatar),
       createdAt,
       updatedAt,
       progress,
@@ -270,6 +277,7 @@ export function migrateLegacyDataToProfiles() {
       {
         id: defaultProfileId,
         name: 'Player 1',
+        avatar: AVATAR_FALLBACK,
         createdAt: now,
         updatedAt: now,
         progress: legacyProgress,

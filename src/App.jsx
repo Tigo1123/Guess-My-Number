@@ -45,6 +45,8 @@ import { ChallengeInvitation } from './components/ChallengeInvitation';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel';
 import { KeyboardShortcutsSettings } from './components/KeyboardShortcutsSettings';
+import { AppImage } from './components/AppImage';
+import { AVATAR_FALLBACK, CHALLENGE_IMAGES, PLAY_HERO_IMAGE } from './utils/imageAssets';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('PLAY');
@@ -99,6 +101,7 @@ export function App() {
     switchProfile,
     renameProfile,
     deleteProfile,
+    updateAvatar,
     triggerExport,
     restoreBackup,
     changeDifficulty,
@@ -299,7 +302,8 @@ export function App() {
         </div>
         <div className="active-player-pill" title="Active Player">
           <span className="avatar-circle">
-            {activeProfile && activeProfile.name ? activeProfile.name.charAt(0).toUpperCase() : 'P'}
+            <AppImage src={activeProfile?.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt="Active player avatar" />
+            <span className="avatar-initial-fallback" aria-hidden="true">{activeProfile?.name?.charAt(0).toUpperCase() || 'P'}</span>
           </span>
           <span className="player-name">{activeProfile ? activeProfile.name : 'Player'}</span>
         </div>
@@ -316,6 +320,7 @@ export function App() {
         <div className="play-layout-grid">
           {/* LEFT MAIN GAME COLUMN (~65%) */}
           <div className="game-board-column">
+            <AppImage src={PLAY_HERO_IMAGE} fallbackSrc={null} alt="Guess My Number game artwork" className="play-hero-image" loading="eager" />
             <SecretNumberDisplay
               status={status}
               secretNumber={secretNumber}
@@ -395,7 +400,7 @@ export function App() {
 
           {/* RIGHT SIDEBAR COLUMN (~35%) */}
           <div className="sidebar-column">
-            <DailyChallengePanel
+          <DailyChallengePanel
               todayKey={todayKey}
               dailyChallengeConfig={dailyChallengeConfig}
               isCompletedToday={isCompletedToday}
@@ -405,7 +410,8 @@ export function App() {
               isPracticeReplay={isPracticeReplay}
               onStartDailyChallenge={startDailyChallenge}
               onStartPracticeReplay={startPracticeReplay}
-              onExitDailyChallenge={exitDailyChallenge}
+          onExitDailyChallenge={exitDailyChallenge}
+              imageSrc={CHALLENGE_IMAGES.daily}
             />
 
             <div className="metrics-card-container">
@@ -512,6 +518,7 @@ export function App() {
           onSwitchProfile={switchProfile}
           onRenameProfile={renameProfile}
           onDeleteProfile={deleteProfile}
+          onUpdateAvatar={updateAvatar}
         />
 
         <div className="divider" />

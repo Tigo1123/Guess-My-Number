@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { AppImage } from './AppImage';
+import { AVATAR_FALLBACK } from '../utils/imageAssets';
 
 export function LocalLeaderboard({ profiles = [], activeProfileId }) {
   const [filter, setFilter] = useState('overall'); // 'overall' | 'easy' | 'medium' | 'hard'
@@ -91,6 +93,7 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
               >
                 <td className="rank-cell" data-label="RANK">{index + 1}</td>
                 <td className="player-cell" data-label="PLAYER">
+                  <AppImage src={pAvatarForEntry(profiles, entry.id)} fallbackSrc={AVATAR_FALLBACK} alt={`${entry.name} avatar`} className="leaderboard-avatar" />
                   <span className="player-name">{entry.name}</span>
                   {entry.isActive && <span className="active-badge" aria-label="Active Player">(Active)</span>}
                 </td>
@@ -106,4 +109,8 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
       </div>
     </section>
   );
+}
+
+function pAvatarForEntry(profiles, id) {
+  return profiles.find((profile) => profile.id === id)?.avatar || AVATAR_FALLBACK;
 }

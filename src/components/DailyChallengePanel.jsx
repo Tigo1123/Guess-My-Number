@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppImage } from './AppImage';
 
 export function DailyChallengePanel({
   todayKey,
@@ -11,6 +12,7 @@ export function DailyChallengePanel({
   onStartDailyChallenge,
   onStartPracticeReplay,
   onExitDailyChallenge,
+  imageSrc,
 }) {
   const { difficulty, mode } = dailyChallengeConfig;
 
@@ -20,6 +22,7 @@ export function DailyChallengePanel({
         <h2 className="daily-panel-title">DAILY CHALLENGE</h2>
         <span className="daily-date">{todayKey}</span>
       </div>
+      {imageSrc && <AppImage src={imageSrc} alt="Daily Challenge illustration" className="challenge-panel-image" />}
 
       <div className="daily-panel-info">
         <div className="daily-info-item">

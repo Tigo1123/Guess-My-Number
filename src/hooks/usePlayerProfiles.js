@@ -6,6 +6,7 @@ import {
   generateUUID,
   createEmptyProgress,
   sanitizeProgress,
+  sanitizeAvatar,
 } from '../utils/profileStorage';
 import { exportProgressBackup, validateBackupJSON } from '../utils/progressBackup';
 
@@ -38,6 +39,7 @@ export function usePlayerProfiles() {
     const newProfile = {
       id: newId,
       name: validation.name,
+      avatar: '/images/avatars/avatar-01.jpeg',
       createdAt: now,
       updatedAt: now,
       progress: createEmptyProgress(),
@@ -51,6 +53,14 @@ export function usePlayerProfiles() {
 
     return { success: true, profile: newProfile };
   }, [profilesData.profiles, updateProfilesData]);
+
+  const updateAvatar = useCallback((id, avatar) => {
+    const nextAvatar = sanitizeAvatar(avatar);
+    updateProfilesData((prev) => ({
+      ...prev,
+      profiles: prev.profiles.map((p) => p.id === id ? { ...p, avatar: nextAvatar, updatedAt: new Date().toISOString() } : p),
+    }));
+  }, [updateProfilesData]);
 
   // Switch Profile
   const switchProfile = useCallback((id) => {
@@ -162,6 +172,7 @@ export function usePlayerProfiles() {
     switchProfile,
     renameProfile,
     deleteProfile,
+    updateAvatar,
     updateActiveProgress,
     triggerExport,
     restoreBackup,
