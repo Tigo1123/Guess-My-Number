@@ -28,7 +28,7 @@ export function Achievements({ unlockedAchievements = [], history = [], streak =
               className={`achievement-card-compact ${isUnlocked ? 'unlocked' : 'locked'}`}
             >
               <div className="achievement-card-top">
-                {ACHIEVEMENT_IMAGES[item.id] && <AppImage src={ACHIEVEMENT_IMAGES[item.id]} alt={`${item.title} achievement badge`} className="achievement-image" />}
+                {ACHIEVEMENT_IMAGES[item.id] && <AppImage src={ACHIEVEMENT_IMAGES[item.id]} alt={`${item.title} achievement badge`} className="artwork-achievement achievement-image" />}
                 <span className="achievement-title-text">{item.title}</span>
                 <span className={`achievement-status-badge ${isUnlocked ? 'unlocked' : 'locked'}`}>
                   {isUnlocked ? 'UNLOCKED' : 'LOCKED'}

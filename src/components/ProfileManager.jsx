@@ -103,7 +103,7 @@ export function ProfileManager({
       <div className="active-player-card">
         <div className="player-card-header">
           <div className="avatar-circle">
-            <AppImage src={activeProfile?.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt={`${activeName} avatar`} />
+            <AppImage src={activeProfile?.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt={`${activeName} avatar`} className="artwork-avatar" />
             <span className="avatar-initial-fallback" aria-hidden="true">{activeName?.charAt(0).toUpperCase() || 'P'}</span>
           </div>
           <div className="player-card-info">
@@ -117,7 +117,7 @@ export function ProfileManager({
           <div className="avatar-choice-list">
             {AVATAR_IMAGES.map((avatar, index) => (
               <button key={avatar} type="button" className={`avatar-choice ${activeProfile?.avatar === avatar ? 'selected' : ''}`} aria-pressed={activeProfile?.avatar === avatar} aria-label={`Choose Avatar ${index + 1}`} onClick={() => onUpdateAvatar?.(activeProfile.id, avatar)}>
-                <AppImage src={avatar} fallbackSrc={AVATAR_FALLBACK} alt={`Avatar ${index + 1}`} />
+                <AppImage src={avatar} fallbackSrc={AVATAR_FALLBACK} alt={`Avatar ${index + 1}`} className="artwork-avatar" />
               </button>
             ))}
           </div>
@@ -174,7 +174,7 @@ export function ProfileManager({
                     aria-label={`Select player ${p.name}${isActive ? ' (currently active)' : ''}`}
                   >
                     <span className="avatar-circle">
-                      <AppImage src={p.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt={`${p.name} avatar`} />
+                      <AppImage src={p.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt={`${p.name} avatar`} className="artwork-avatar" />
                       <span className="avatar-initial-fallback" aria-hidden="true">{p.name?.charAt(0).toUpperCase() || 'P'}</span>
                     </span>
                     <span className="profile-item-name">{p.name}</span>

@@ -302,7 +302,7 @@ export function App() {
         </div>
         <div className="active-player-pill" title="Active Player">
           <span className="avatar-circle">
-            <AppImage src={activeProfile?.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt="Active player avatar" />
+            <AppImage src={activeProfile?.avatar || AVATAR_FALLBACK} fallbackSrc={AVATAR_FALLBACK} alt="Active player avatar" className="artwork-avatar" />
             <span className="avatar-initial-fallback" aria-hidden="true">{activeProfile?.name?.charAt(0).toUpperCase() || 'P'}</span>
           </span>
           <span className="player-name">{activeProfile ? activeProfile.name : 'Player'}</span>
@@ -320,11 +320,14 @@ export function App() {
         <div className="play-layout-grid">
           {/* LEFT MAIN GAME COLUMN (~65%) */}
           <div className="game-board-column">
-            <AppImage src={PLAY_HERO_IMAGE} fallbackSrc={null} alt="Guess My Number game artwork" className="play-hero-image" loading="eager" />
-            <SecretNumberDisplay
-              status={status}
-              secretNumber={secretNumber}
-            />
+            <div className={`play-hero play-hero-${status.toLowerCase()}`} aria-label="Guess My Number game artwork">
+              <AppImage src={PLAY_HERO_IMAGE} fallbackSrc={null} alt="" decorative className="artwork-hero play-hero-image" loading="eager" />
+              <div className="play-hero-overlay" aria-hidden="true" />
+              {isGameOver && <SecretNumberDisplay
+                status={status}
+                secretNumber={secretNumber}
+              />}
+            </div>
 
             <GameStatusMessage
               message={message}

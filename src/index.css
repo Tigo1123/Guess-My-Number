@@ -479,9 +479,14 @@ button:disabled {
   flex-direction: column;
   gap: var(--space-lg);
 }
-.play-hero-image { width: 100%; max-width: 30rem; aspect-ratio: 16 / 6; object-fit: cover; border-radius: var(--radius-lg); border: 1px solid var(--border); margin: 0 auto; display: block; }
-.game-state-image { width: 4.25rem; height: 4.25rem; object-fit: cover; border-radius: var(--radius-sm); }
-.feedback-state-image { width: 2.75rem; height: 2.75rem; object-fit: cover; border-radius: 50%; flex: 0 0 auto; }
+.artwork-hero { width: min(84%, 44rem); height: auto; aspect-ratio: 1280 / 853; object-fit: contain; }
+.play-hero { position: relative; width: min(100%, 56rem); min-height: clamp(16rem, 30vw, 22rem); display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; border-radius: 1.6rem; border: 1px solid var(--border); background: var(--bg-surface); box-shadow: 0 14px 36px rgba(30, 110, 220, .16); isolation: isolate; }
+.play-hero-image { position: absolute; inset: 0; z-index: 0; width: 100%; max-width: none; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: center; border-radius: inherit; margin: 0 auto; display: block; }
+.play-hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(5, 10, 18, .08), rgba(5, 10, 18, .42)); pointer-events: none; }
+.play-hero-won .play-hero-image, .play-hero-lost .play-hero-image { opacity: 0; }
+.play-hero-won .play-hero-overlay, .play-hero-lost .play-hero-overlay { background: var(--bg-surface); }
+.play-hero > .secret-number-container { position: relative; z-index: 2; width: min(100% - 2rem, 32rem); margin: 1rem; }
+.feedback-state-image { flex: 0 0 auto; }
 
 .sidebar-column {
   display: flex;
@@ -491,6 +496,8 @@ button:disabled {
 
 /* Hero Secret Number Card */
 .secret-number-container {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -502,6 +509,13 @@ button:disabled {
   border-radius: var(--radius-lg);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
 }
+.secret-number-container.won { min-height: clamp(19rem, 40vw, 28rem); background: transparent; }
+.secret-number-container.won .result-card-background { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.secret-number-container.won .result-card-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(5, 10, 20, .1), rgba(5, 10, 20, .68)); }
+.result-card-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-md); width: 100%; }
+.secret-number-container.won .result-card-content { min-height: 20rem; }
+.secret-number-container.won .secret-label { color: #f8fafc; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.secret-number-container.won .secret-circle { box-shadow: 0 8px 28px rgba(0,0,0,.3); }
 
 .secret-circle {
   width: 150px;
@@ -530,6 +544,7 @@ button:disabled {
   border-color: var(--danger);
   color: var(--danger);
 }
+.secret-number-container.playing .secret-circle { width: 76px; height: 76px; font-size: 4.5rem; }
 
 .secret-label {
   font-size: 1.4rem;
@@ -685,8 +700,9 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
 }
-.challenge-panel-image, .challenge-dialog-image { width: 100%; max-height: 9rem; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-.challenge-dialog-image { max-height: 8rem; }
+.artwork-feature { width: min(100%, 18rem); height: auto; aspect-ratio: 1280 / 853; object-fit: contain; border-radius: var(--radius-md); }
+.challenge-panel-image { width: min(100%, 13.75rem); max-height: 13rem; margin: .2rem auto .35rem; }
+.challenge-dialog-image { width: min(100%, 16.25rem); max-height: 12rem; margin: .2rem auto .35rem; }
 
 .daily-panel-title {
   color: var(--text-primary);
@@ -1020,7 +1036,8 @@ button:disabled {
   align-items: flex-start;
   gap: var(--space-xs);
 }
-.achievement-image { width: 42px; height: 42px; object-fit: cover; border-radius: var(--radius-sm); flex: 0 0 auto; }
+.artwork-achievement { width: clamp(4rem, 8vw, 5.5rem); height: clamp(4rem, 8vw, 5.5rem); object-fit: cover; border-radius: var(--radius-md); flex: 0 0 auto; }
+.artwork-avatar { aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%; }
 
 .achievement-title-text {
   font-weight: 600;
@@ -1577,8 +1594,8 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
-  .play-hero-image { max-height: 9rem; aspect-ratio: 16 / 7; }
-  .game-state-image { width: 3.5rem; height: 3.5rem; }
+  .play-hero { min-height: clamp(16rem, 78vw, 22rem); }
+  .play-hero-image { width: 100%; }
   .challenge-panel-image, .challenge-dialog-image { max-height: 7rem; }
 }
 
@@ -2110,13 +2127,44 @@ button:disabled {
 .endless-round-indicator { border-color: var(--accent); }
 .endless-next-round { width: 100%; margin-top: var(--space-md); }
 .endless-new-best { margin: var(--space-md) 0 0; text-align: center; color: var(--warning); font-weight: 700; }
-.direction-feedback { display: flex; align-items: center; justify-content: center; gap: .9rem; width: min(100%, 30rem); margin: 0 auto; padding: 1rem 1.2rem; border: 1px solid var(--warning); border-radius: var(--radius-md); background: var(--bg-surface); box-shadow: 0 8px 20px rgba(0,0,0,.12); animation: direction-pop-up .32s ease-out both; }
-.direction-feedback.too-low { border-color: #38bdf8; background: var(--bg-surface); animation-name: direction-pop-down; }
-.direction-feedback-arrow { flex: 0 0 auto; font-size: 2.5rem; line-height: 1; }
-.direction-feedback-copy { display: grid; gap: .1rem; text-align: left; }
-.direction-feedback-copy strong { color: var(--warning); font-size: 1.65rem; letter-spacing: .06em; }
-.too-low .direction-feedback-copy strong { color: #38bdf8; }
-.direction-feedback-copy span { color: var(--text-secondary); font-size: 1.25rem; }
+/* Large local artwork and readable copy share one framed feedback card. */
+.direction-feedback,
+.secret-number-container.lost {
+  --feedback-accent: #fbbf24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  width: min(100%, 38rem);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 1.6rem;
+  border: 1px solid var(--feedback-accent);
+  border-radius: 2rem;
+  background: linear-gradient(150deg, rgba(124, 58, 237, .12), transparent 65%), var(--bg-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+}
+.direction-feedback { animation: direction-pop-up .32s ease-out both; }
+.direction-feedback.too-low { --feedback-accent: #7dd3fc; animation-name: direction-pop-down; }
+.direction-feedback.proximity-almost { --feedback-accent: #fdba74; gap: 1.6rem; }
+.secret-number-container.lost { --feedback-accent: #fda4af; }
+.feedback-artwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(16rem, 45vw, 20rem);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 1.3rem;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, .2), #101827 80%);
+}
+.feedback-artwork .feedback-state-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+.direction-feedback-copy { display: grid; gap: .6rem; min-width: 0; text-align: center; }
+.direction-feedback-copy strong { color: var(--feedback-accent); font-size: clamp(2.2rem, 6vw, 2.6rem); font-weight: 800; line-height: 1.15; letter-spacing: .04em; }
+.direction-feedback-copy span { color: var(--text-primary); font-size: 1.5rem; line-height: 1.5; }
+.secret-number-container.lost .secret-label { text-align: center; line-height: 1.5; }
+.secret-number-container.lost .secret-circle { width: 10rem; height: 10rem; font-size: 5.6rem; flex-shrink: 0; }
 .proximity-feedback.proximity-almost { animation-duration: .38s; }
 .proximity-feedback.proximity-high,
 .proximity-feedback.proximity-low { animation-duration: .3s; }
@@ -2132,7 +2180,7 @@ body, .card-panel, .summary-card-block, .app-nav, .nav-tab, button, input, .secr
 .tab-panel:not([hidden]) { animation: panel-enter .18s ease-out both; }
 .guess-input.wrong-guess-shake { animation: wrong-guess-shake .22s ease-in-out; }
 .secret-circle.revealed { animation: number-reveal .48s cubic-bezier(.2,.8,.3,1) both; }
-.win-particles { position: absolute; inset: 50% auto auto 50%; width: 1px; height: 1px; pointer-events: none; }
+.win-particles { position: absolute; inset: 50% auto auto 50%; z-index: 3; width: 1px; height: 1px; pointer-events: none; }
 .secret-number-container { position: relative; }
 .win-particles i { position: absolute; width: .6rem; height: .6rem; border-radius: 50%; background: var(--accent); animation: particle-burst .48s ease-out both; }
 .win-particles i:nth-child(1) { --x: -5rem; --y: -3rem; }

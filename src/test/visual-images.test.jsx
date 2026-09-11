@@ -22,12 +22,25 @@ describe('visual image integration', () => {
   });
 
   it.each([
-    ['PLAYING', 'thinking', 'Thinking about the hidden number'],
     ['WON', 'win', 'Celebration after a correct guess'],
     ['LOST', 'loss', 'Game over'],
   ])('maps %s game state to local artwork', (status, state, alt) => {
     render(<SecretNumberDisplay status={status} secretNumber={19} />);
-    expect(screen.getByAltText(alt)).toHaveAttribute('src', STATE_IMAGES[state]);
+    const image = screen.getByAltText(alt);
+    expect(image).toHaveAttribute('src', STATE_IMAGES[state]);
+    if (status === 'WON') expect(image).toHaveClass('result-card-background');
+  });
+
+  it('keeps the correct feedback row free of duplicate win artwork', () => {
+    const { container } = render(<GameStatusMessage message="Correct Number" maxNumber={20} />);
+    expect(container.querySelector('.correct-feedback img')).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('CORRECT!');
+  });
+
+  it('does not render thinking artwork in the revealed-state component', () => {
+    render(<SecretNumberDisplay status="PLAYING" secretNumber={19} />);
+    expect(screen.queryByAltText('Thinking about the hidden number')).toBeNull();
+    expect(screen.getByText('Guess the number')).toBeInTheDocument();
   });
 
   it('maps directional feedback images while preserving text', () => {
@@ -37,6 +50,25 @@ describe('visual image integration', () => {
     rerender(<GameStatusMessage message="Too Low" maxNumber={20} proximity={{ level: 'low', direction: 'low' }} />);
     expect(screen.getByRole('status')).toHaveTextContent('TOO LOW');
     expect(container.querySelector('img')).toHaveAttribute('src', STATE_IMAGES.low);
+  });
+
+  it('restarts the feedback card for repeated wrong guesses and keeps its live message', () => {
+    const props = { message: 'Too High', maxNumber: 20, proximity: { level: 'almost', direction: 'high' } };
+    const { rerender, container } = render(<GameStatusMessage {...props} feedbackToken={1} />);
+    const first = screen.getByRole('status');
+    expect(container.querySelector('.feedback-artwork img')).toHaveAttribute('src', STATE_IMAGES.almost);
+    rerender(<GameStatusMessage {...props} feedbackToken={2} />);
+    expect(screen.getByRole('status')).not.toBe(first);
+    expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
+    expect(screen.getByRole('status')).toHaveTextContent('Just a little too high');
+  });
+
+  it('keeps the loss title and secret readable if artwork fails', () => {
+    render(<SecretNumberDisplay status="LOST" secretNumber={19} />);
+    fireEvent.error(screen.getByAltText('Game over'));
+    expect(screen.getByText('GAME OVER')).toBeInTheDocument();
+    expect(screen.getByText('19')).toBeInTheDocument();
+    expect(screen.getByText('Game over — secret number was')).toBeInTheDocument();
   });
 
   it('renders daily challenge artwork with meaningful alt text', () => {

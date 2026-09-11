@@ -93,7 +93,7 @@ export function LocalLeaderboard({ profiles = [], activeProfileId }) {
               >
                 <td className="rank-cell" data-label="RANK">{index + 1}</td>
                 <td className="player-cell" data-label="PLAYER">
-                  <AppImage src={pAvatarForEntry(profiles, entry.id)} fallbackSrc={AVATAR_FALLBACK} alt={`${entry.name} avatar`} className="leaderboard-avatar" />
+                  <AppImage src={pAvatarForEntry(profiles, entry.id)} fallbackSrc={AVATAR_FALLBACK} alt={`${entry.name} avatar`} className="artwork-avatar leaderboard-avatar" />
                   <span className="player-name">{entry.name}</span>
                   {entry.isActive && <span className="active-badge" aria-label="Active Player">(Active)</span>}
                 </td>

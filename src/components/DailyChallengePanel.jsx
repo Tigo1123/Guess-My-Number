@@ -22,7 +22,7 @@ export function DailyChallengePanel({
         <h2 className="daily-panel-title">DAILY CHALLENGE</h2>
         <span className="daily-date">{todayKey}</span>
       </div>
-      {imageSrc && <AppImage src={imageSrc} alt="Daily Challenge illustration" className="challenge-panel-image" />}
+      {imageSrc && <AppImage src={imageSrc} alt="Daily Challenge illustration" className="artwork-feature challenge-panel-image" />}
 
       <div className="daily-panel-info">
         <div className="daily-info-item">
